@@ -61,7 +61,7 @@ h1,h2,h3{font-family:var(--f-d);font-weight:700;margin:0;text-wrap:balance;lette
 .sp{justify-content:space-between}
 .mute{color:var(--mute)}
 .small{font-size:13px}
-.cap{font:700 11px var(--f-b);text-transform:uppercase;letter-spacing:.08em;color:var(--mute)}
+.cap{font:800 13px var(--f-b);color:var(--mute)}
 .btn{font:800 15px var(--f-b);padding:13px 18px;border-radius:14px;border:0;background:var(--terra);color:var(--on-terra);box-shadow:0 4px 0 var(--terra-d);cursor:pointer;min-height:48px;display:inline-flex;align-items:center;justify-content:center;gap:8px;text-align:center}
 .btn:active:not(:disabled){transform:translateY(3px);box-shadow:0 1px 0 var(--terra-d)}
 .btn:disabled{opacity:.45;cursor:not-allowed}
@@ -75,7 +75,7 @@ h1,h2,h3{font-family:var(--f-d);font-weight:700;margin:0;text-wrap:balance;lette
 .bar>i{display:block;height:100%;border-radius:99px;background:var(--olive);min-width:0;transition:width .4s}
 .bar.gold>i{background:var(--gold)}
 .bar.sea>i{background:var(--sea)}
-.chip{display:inline-block;font:800 11px var(--f-b);padding:3px 9px;border-radius:99px;text-transform:uppercase;letter-spacing:.05em;--k:var(--sea);color:var(--ink);background:color-mix(in srgb,var(--k) 18%,var(--card));border:1.5px solid color-mix(in srgb,var(--k) 55%,var(--card))}
+.chip{display:inline-block;font:800 12.5px var(--f-b);padding:3px 10px;border-radius:99px;--k:var(--sea);color:var(--ink);background:color-mix(in srgb,var(--k) 18%,var(--card));border:1.5px solid color-mix(in srgb,var(--k) 55%,var(--card))}
 .k-livre{--k:var(--sea)}.k-musique{--k:var(--terra)}.k-film{--k:var(--gold)}.k-serie{--k:var(--olive)}
 .card.okc{border-color:color-mix(in srgb,var(--olive) 60%,var(--line))}
 .avl{font:700 9px var(--f-b);fill:var(--mute);text-transform:uppercase;letter-spacing:.06em}.avv{font:800 12px var(--f-b);fill:var(--ink)}
@@ -131,6 +131,21 @@ svg .wts{stroke:var(--water);fill:none;stroke-width:2.2;stroke-linecap:round}
 .hud-bot .bar{height:14px}
 .hud-bot .evo{font-size:12.5px;color:var(--mute);margin-top:6px}
 
+/* semaine */
+.wk{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.wd{display:grid;justify-items:center;gap:5px;font:800 12px var(--f-b);color:var(--mute)}
+.wd i{width:100%;max-width:42px;aspect-ratio:1;border-radius:50%;border:3px dashed var(--line);display:grid;place-items:center;color:#fff}
+.wd i svg{width:60%;height:60%}
+.wd.on i{background:var(--olive);border:3px solid var(--olive-d)}
+.wd.now i{border:3px solid var(--terra)}
+.wd.now{color:var(--ink)}
+.wd.past:not(.on) i{opacity:.5}
+.tab{position:relative}
+.tab .dot{position:absolute;top:5px;left:calc(50% + 8px);width:10px;height:10px;border-radius:50%;background:var(--danger);border:2px solid var(--card)}
+.hchip.ok{background:color-mix(in srgb,var(--olive) 30%,var(--card));border-color:color-mix(in srgb,var(--olive) 65%,var(--card))}
+.hchip.warn{background:color-mix(in srgb,var(--gold) 32%,var(--card));border-color:color-mix(in srgb,var(--gold) 65%,var(--card))}
+.hchip.bad{background:color-mix(in srgb,var(--danger) 25%,var(--card));border-color:color-mix(in srgb,var(--danger) 60%,var(--card))}
+button.hchip{cursor:pointer;color:inherit}
 /* forêt isométrique */
 .scene{display:block;width:100%;height:auto;border-radius:16px;background:linear-gradient(var(--sea-t),var(--sea-b));user-select:none}
 .scene .wv{fill:none;stroke:#fff;stroke-opacity:.45;stroke-width:2;stroke-linecap:round}
@@ -217,7 +232,7 @@ th{color:var(--mute);font-size:11px;text-transform:uppercase;letter-spacing:.06e
 .cat svg{width:46px;height:46px;flex:none}
 .spin{width:22px;height:22px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--terra);animation:sp .8s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
-#toast{position:fixed;left:50%;bottom:calc(88px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);background:var(--ink);color:var(--bg);font-weight:800;padding:11px 18px;border-radius:99px;z-index:70;opacity:0;pointer-events:none;transition:.25s;max-width:calc(100% - 32px);text-align:center;font-size:14px}
+#toast{position:fixed;left:50%;top:calc(66px + env(safe-area-inset-top,0px));transform:translate(-50%,-14px);background:var(--ink);color:var(--bg);font-weight:800;padding:11px 18px;border-radius:99px;z-index:70;opacity:0;pointer-events:none;transition:.25s;max-width:calc(100% - 32px);text-align:center;font-size:14px}
 #toast.on{opacity:1;transform:translate(-50%,0)}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -462,11 +477,27 @@ function initC3(){
   }catch(err){C3.ok=false}
   return C3.ok;
 }
+function hitS(){const m=new THREE.Mesh(new THREE.SphereGeometry(.22,8,6),new THREE.MeshBasicMaterial({visible:false}));m.position.y=.12;return m}
+const SAY={
+  lapin:["Ça sent le trèfle ici !","Je saute pour toi, regarde.","Tu as fait ta séance ? Tu as la forme."],
+  renard:["Je surveille les corbeaux.","Un orage ? Pas cette semaine.","Les renards raffolent des glands."],
+  ecureuil:["J'ai caché des glands partout.","Chut, je cherche où j'en ai mis.","Plus de niveaux, plus de noisettes."],
+  herisson:["Je suis piquant, mais gentil.","Doucement, je me roule en boule.","Belle forêt, pas besoin de la défendre."],
+  cerf:["Ta forêt grandit bien.","Je veille sur les clairières."],
+  ours:["Un petit câlin ? Doucement.","Je dors tout l'hiver, pas toi."],
+  hibou:["Hou ! Je vois tout d'ici.","Les objectifs de la semaine, c'est noté ?"],
+  canard:["Coin !","L'étang est parfait aujourd'hui."]
+};
+function saySpecies(k){
+  const a=SP.find(x=>x.k===k),L=SAY[k]||["Bonjour !"];
+  C3.react={k,t:C3.t};C3.dirty=true;
+  toast((a?a.n:"Ami")+" : « "+L[Math.floor(Math.random()*L.length)]+" »");
+}
 function pick3(e){
   const r=C3.cv.getBoundingClientRect(),v=new THREE.Vector2((e.clientX-r.left)/r.width*2-1,-((e.clientY-r.top)/r.height)*2+1);
   const rc=new THREE.Raycaster();rc.setFromCamera(v,C3.cam);
   const hits=rc.intersectObjects(C3.city.children,true);
-  for(let i=0;i<hits.length;i++){let o=hits[i].object;while(o&&o.userData.tile===undefined)o=o.parent;if(o){sheetTile(o.userData.tile);return}}
+  for(let i=0;i<hits.length;i++){let o=hits[i].object;while(o&&o.userData.tile===undefined&&!o.userData.say)o=o.parent;if(o){if(o.userData.say){saySpecies(o.userData.say);return}sheetTile(o.userData.tile);return}}
 }
 function treeG(P,s,col,x,z){
   const g=new THREE.Group();
@@ -475,16 +506,24 @@ function treeG(P,s,col,x,z){
   g.add(ball(.14*s,col.clone().multiplyScalar(1.1),.1*s,.55*s,.06*s));
   g.position.set(x,0,z);return g;
 }
+function tod(){
+  const d=new Date(),h=d.getHours()+d.getMinutes()/60;
+  if(h>=9&&h<17.5)return {k:"day"};
+  if(h>=6.5&&h<9)return {k:"dawn",sky:"#F7D3C0",sea:"#F0A9B4",mix:.4,hemi:0xffe6d0,hi:.72,sun:0xffc89a,si:.6};
+  if(h>=17.5&&h<20.5)return {k:"dusk",sky:"#F2A0A0",sea:"#E8869C",mix:.5,hemi:0xffe0c8,hi:.82,sun:0xffa878,si:.62};
+  return {k:"night",sky:"#1C2B52",sea:"#14224A",mix:.8,hemi:0x8fa3e6,hi:.66,sun:0xb4c2ff,si:.34};
+}
 function buildDeco(){
   const P=C3.P,d=C3.deco,N=GN(),h=N/2,f=N/6;clearGroup(d);C3.aD=[];
-  C3.scene.background=P.seaT.clone();C3.scene.fog=new THREE.Fog(P.seaT.clone(),40*f,85*f);
-  const sea=new THREE.Mesh(new THREE.PlaneGeometry(90*f,90*f),mt(P.water.clone().multiplyScalar(.9)));sea.rotation.x=-Math.PI/2;sea.position.y=-.62;sea.receiveShadow=true;d.add(sea);
+  const T=tod(),sky=T.sky?new THREE.Color(T.sky):P.seaT.clone();
+  C3.scene.background=sky;C3.scene.fog=new THREE.Fog(sky.clone(),40*f,85*f);
+  const sea=new THREE.Mesh(new THREE.PlaneGeometry(90*f,90*f),mt(T.sea?P.water.clone().multiplyScalar(.9).lerp(new THREE.Color(T.sea),T.mix):P.water.clone().multiplyScalar(.9)));sea.rotation.x=-Math.PI/2;sea.position.y=-.62;sea.receiveShadow=true;d.add(sea);
   const foam=new THREE.Mesh(new THREE.PlaneGeometry(N+2.4,N+2.4),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.16}));foam.rotation.x=-Math.PI/2;foam.position.y=-.6;d.add(foam);
   C3.aD.push(t=>{const s=1+.03*Math.sin(t*1.2);foam.scale.set(s,s,s);foam.material.opacity=.13+.05*Math.sin(t*1.2)});
   const foam2=new THREE.Mesh(new THREE.PlaneGeometry(N+3.6,N+3.6),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.08}));foam2.rotation.x=-Math.PI/2;foam2.position.y=-.61;d.add(foam2);
   C3.aD.push(t=>{const s=1+.04*Math.sin(t*1.2+1.6);foam2.scale.set(s,s,s);foam2.material.opacity=.07+.05*Math.sin(t*1.2+1.6)});
   const pc=[P.pink,P.gold,P.wall,P.olive];
-  for(let i=0,pn=Math.round(16*f);i<pn;i++){
+  for(let i=0,pn=T.k==='night'?0:Math.round(16*f);i<pn;i++){
     const m=new THREE.Mesh(new THREE.PlaneGeometry(.07,.05),new THREE.MeshBasicMaterial({color:pc[i%4],side:THREE.DoubleSide,transparent:true,opacity:.9}));d.add(m);
     const x0=(rnd(i+200)-.5)*(N+1),z0=(rnd(i+210)-.5)*(N+1),sp=.1+rnd(i+220)*.12,ph=rnd(i+230)*6;
     C3.aD.push(t=>{const u=(t*sp+ph)%1;m.position.set(x0+Math.sin(t*.8+ph)*.5,3.2-u*3.1,z0+Math.cos(t*.6+ph)*.4);m.rotation.set(t*1.3+ph,t*.9,t*1.1);m.material.opacity=Math.min(.9,u*6,(1-u)*4)});
@@ -510,6 +549,14 @@ function buildDeco(){
   boat.add(mm(gBox(.56,.1,.2),P.roof,0,.05,0));boat.add(mm(gBox(.4,.07,.15),P.wood,0,.12,0));boat.add(mm(gCyl(.012,.012,.42,6),P.dark,0,.32,0));
   boat.add(mm(gBox(.01,.3,.22),P.wall,0,.36,.02));d.add(boat);
   C3.aD.push(t=>{const a=t*.1;boat.position.set(Math.cos(a)*(h+(N>=10?4.4:2.6)),-.58+.03*Math.sin(t*2),Math.sin(a)*(h+(N>=10?4.4:2.6)));boat.rotation.y=-a+Math.PI;boat.rotation.z=.04*Math.sin(t*1.7)});
+  if(T.k==="dusk"||T.k==="night"){
+    const ffm=new THREE.MeshBasicMaterial({color:0xfff2a8});
+    for(let i=0,fn2=Math.round((T.k==="night"?22:12)*f);i<fn2;i++){
+      const m=new THREE.Mesh(gSph(.04),ffm);d.add(m);
+      const x0=(rnd(i+300)-.5)*(N-.5),z0=(rnd(i+310)-.5)*(N-.5),ph=rnd(i+320)*6;
+      C3.aD.push(t=>{m.position.set(x0+Math.sin(t*.4+ph)*.6,.45+.25*Math.sin(t*.9+ph),z0+Math.cos(t*.35+ph)*.6);m.scale.setScalar(.7+.6*Math.abs(Math.sin(t*2+ph)))});
+    }
+  }
   for(let i=0;i<4;i++){
     const c=new THREE.Group();
     [[0,0,0,.55],[.5,-.05,.1,.42],[-.5,-.05,-.05,.4],[.15,.2,0,.4]].forEach(b=>{const s=new THREE.Mesh(gSph(1),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.92}));s.scale.set(b[3],b[3]*.7,b[3]);s.position.set(b[0],b[1],b[2]);c.add(s)});
@@ -520,7 +567,7 @@ function buildDeco(){
 }
 function buildCity(){
   const P=C3.P,c=C3.city;clearGroup(c);C3.aC=[];MC.forEach(m=>m.dispose());MC=new Map();
-  const fcol=[P.pink,P.wall,P.gold,C_("#C9A7F0")],N=GN(),h=N/2,ctr=(N-1)/2;
+  const fcol=[P.pink,P.wall,P.gold,C_("#C9A7F0")],N=GN(),h=N/2,ctr=(N-1)/2,keys=S.grid.map(b=>b?b.t+b.l+b.x:""),prevK=C3.prevB;C3.prevB=keys;
   for(let i=0;i<N*N;i++){
     const r=Math.floor(i/N),cc=i%N,road=isRoad(i),b=S.grid[i],tx=cc-ctr,tz=r-ctr;
     const g=mm(gBox(.99,.12,.99),road?P.road:((r+cc)%2?P.grass:P.grass.clone().multiplyScalar(.93)),tx,-.06,tz);g.castShadow=false;
@@ -535,6 +582,12 @@ function buildCity(){
       continue;
     }
     const bg=B3[b.t](P,C3.aC);bg.position.set(tx,0,tz);bg.userData.tile=i;
+    if(prevK&&prevK[i]!==keys[i]&&!REDUCED){
+      bg.scale.setScalar(.01);
+      const puff=new THREE.Mesh(new THREE.RingGeometry(.3,.4,28),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.7,side:THREE.DoubleSide}));
+      puff.rotation.x=-Math.PI/2;puff.position.set(tx,.03,tz);c.add(puff);
+      let u=0;C3.aC.push((t,dt)=>{if(u>=1)return;u=Math.min(1,u+dt/.6);const c1=1.70158,c3=c1+1,e=1+c3*Math.pow(u-1,3)+c1*Math.pow(u-1,2);bg.scale.setScalar(Math.max(.01,e));puff.scale.setScalar(.5+u*2);puff.material.opacity=.7*(1-u);if(u>=1){puff.visible=false;bg.scale.setScalar(1)}});
+    }
     if(b.x){
       bg.traverse(o=>{if(o.isMesh&&o.material&&!o.material.transparent){o.material=o.material.clone();o.material.color.lerp(P.gray,.6).multiplyScalar(.8)}});
       const st=new THREE.Group(),h=H3[b.t]+.38;
@@ -556,26 +609,28 @@ function buildCity(){
   const walkers=SP.filter(a=>a.k!=="hibou"&&a.k!=="canard"&&pop>=a.at);
   walkers.forEach((a,k)=>{
     const an=mkAnimal(a.k,P),horiz=k%2===0,lane=((k%3)-1)*.2,sp=.12+rnd(k+7)*.12;let pos=(rnd(k+20)-.5)*(N-1),dir=rnd(k)>.5?1:-1;
-    an.traverse(o=>{if(o.isMesh){o.castShadow=true}});c.add(an);
+    an.traverse(o=>{if(o.isMesh){o.castShadow=true}});an.userData.say=a.k;an.add(hitS());c.add(an);
     C3.aC.push((t,dt)=>{pos+=dir*sp*dt;if(Math.abs(pos)>h-.3)dir*=-1;
-      const hop=a.k==="lapin"?Math.abs(Math.sin(t*6+k))*.07:.012*Math.abs(Math.sin(t*8+k));
+      const hop=(a.k==="lapin"?Math.abs(Math.sin(t*6+k))*.07:.012*Math.abs(Math.sin(t*8+k)))+(C3.react&&C3.react.k===a.k&&t-C3.react.t<.9?Math.abs(Math.sin((t-C3.react.t)*9))*.16:0);
       if(horiz)an.position.set(pos,.01+hop,.5+lane);else an.position.set(-.5+lane,.01+hop,pos);
       an.rotation.y=horiz?(dir>0?Math.PI/2:-Math.PI/2):(dir>0?0:Math.PI)});
   });
   if(pop>=20){
     const ow=mkAnimal("hibou",P),ox=hasT>=0?hasT%N-ctr:-(h+.1),oz=hasT>=0?Math.floor(hasT/N)-ctr:-(h+.1);
-    ow.position.set(ox+.02,hasT>=0?1.34:.08,oz+.02);ow.rotation.y=-.4;c.add(ow);
+    ow.userData.say="hibou";ow.add(hitS());ow.position.set(ox+.02,hasT>=0?1.34:.08,oz+.02);ow.rotation.y=-.4;c.add(ow);
     C3.aC.push(t=>{ow.rotation.y=-.4+.35*Math.sin(t*.5);ow.position.y=(hasT>=0?1.34:.08)+.006*Math.sin(t*3)});
   }
   if(hasP>=0){
     const px=hasP%N-ctr,pz=Math.floor(hasP/N)-ctr,n=pop>=8?2:1;
-    for(let k=0;k<n;k++){const du=mkAnimal("canard",P);c.add(du);C3.aC.push(t=>{const a=t*.45+k*3.1,rr=.2;du.position.set(px+rr*Math.cos(a),.09+.008*Math.sin(t*2+k),pz+rr*Math.sin(a));du.rotation.y=-a});}
+    for(let k=0;k<n;k++){const du=mkAnimal("canard",P);du.userData.say="canard";du.add(hitS());c.add(du);C3.aC.push(t=>{const a=t*.45+k*3.1,rr=.2;du.position.set(px+rr*Math.cos(a),.09+.008*Math.sin(t*2+k),pz+rr*Math.sin(a));du.rotation.y=-a});}
   }
 }
 function syncC3(){
   if(!C3.ok)return;
   const th=getComputedStyle(document.documentElement).getPropertyValue("--bg").trim()+getComputedStyle(document.documentElement).getPropertyValue("--grass").trim();
   if(th!==C3.theme){C3.theme=th;C3.P=pal();C3.n=0}
+  const T=tod();
+  if(C3.todk!==T.k){C3.todk=T.k;C3.hemi.color.set(T.hemi||0xdff4ff);C3.hemi.intensity=T.hi||.72;C3.sun.color.set(T.sun||0xfff0d6);C3.sun.intensity=T.si||.6;C3.n=0}
   const N=GN();
   if(C3.sz!==N){const f=N/6;C3.sz=N;C3.rmin=9*f;C3.rmax=40*f;C3.rad=27*f;const sc=C3.sun.shadow.camera,e=N/2+3;sc.left=-e;sc.right=e;sc.top=e;sc.bottom=-e;sc.far=30*f;sc.updateProjectionMatrix();C3.sun.position.set(5*f,9*f,4*f)}
   if(C3.n!==N){C3.n=N;buildDeco();C3.sig=""}
@@ -586,6 +641,7 @@ function syncC3(){
 function loop3(now){
   if(!C3.on)return;C3.raf=requestAnimationFrame(loop3);
   const t=now/1000,dt=Math.min(.05,C3.t?t-C3.t:.016);C3.t=t;
+  if(!C3.chk||t-C3.chk>60){C3.chk=t;if(tod().k!==C3.todk)syncC3()}
   const d=C3.azT-C3.az;if(Math.abs(d)>.0005){C3.az+=d*Math.min(1,dt*9);C3.dirty=true}
   if(REDUCED&&!C3.dirty)return;
   if(!REDUCED){C3.aD.forEach(f=>f(t,dt));C3.aC.forEach(f=>f(t,dt))}
@@ -661,6 +717,17 @@ async function pushDb(){
   finally{saving=false;if(again){again=false;pushDb()}}
 }
 
+function burst(n,cx,cy){
+  if(REDUCED)return;
+  const cols=["var(--gold)","var(--terra)","var(--sea)","var(--olive)","#F4A6B8"];
+  for(let i=0;i<n;i++){
+    const e=document.createElement("i"),sz=6+Math.random()*7;
+    e.style.cssText="position:fixed;left:"+cx+"px;top:"+cy+"px;width:"+sz+"px;height:"+sz*.6+"px;background:"+cols[i%5]+";border-radius:2px;z-index:90;pointer-events:none";
+    document.body.appendChild(e);
+    const a=Math.random()*Math.PI*2,v=90+Math.random()*180,dx=Math.cos(a)*v,dy=Math.sin(a)*v-120;
+    e.animate([{transform:"translate(0,0) rotate(0deg)",opacity:1},{transform:"translate("+dx+"px,"+(dy+260)+"px) rotate("+Math.round(Math.random()*720-360)+"deg)",opacity:0}],{duration:900+Math.random()*500,easing:"cubic-bezier(.2,.7,.4,1)"}).onfinish=()=>e.remove();
+  }
+}
 /* ---------- économie ---------- */
 const lvlOf=xp=>Math.floor(Math.sqrt(xp/60))+1;
 const RANKS=["Graine","Pousse","Brindille","Feuille","Sentier","Sous-bois","Grand chêne","Esprit de la forêt"];
@@ -671,9 +738,14 @@ function toast(msg){const t=$("#toast");t.textContent=msg;t.classList.add("on");
 function gain(xp,den,reels,msg){
   den=den||0;reels=reels||0;
   const l0=lvlOf(S.xp);S.xp+=xp;S.den+=den;S.reels+=reels;const l1=lvlOf(S.xp);
-  let t="+"+xp+" XP";if(den)t+=" · +"+den+" gl.";if(reels)t+=" · +"+reels+" luciole"+(reels>1?"s":"");
+  let t="+"+xp+" XP";if(den)t+=" et +"+den+" glands";
   toast((msg?msg+" ":"")+t);
-  if(l1>l0){setTimeout(()=>toast("Niveau "+l1+" · "+rank(l1)),2300);if(growIfNeeded())setTimeout(()=>toast("Ta forêt s'agrandit !"),4600)}
+  burst(l1>l0?42:16,innerWidth/2,innerHeight*.32);
+  if(l1>l0){const grew=growIfNeeded();setTimeout(()=>{
+    if(!$("#sheet").hidden){toast("Niveau "+l1+" · "+rank(l1));return}
+    openSheet("Niveau supérieur",'<div style="text-align:center;display:grid;gap:12px;justify-items:center"><div class="lvl num" style="width:88px;height:88px;font-size:38px">'+l1+'</div><h3 style="font-size:22px">'+rank(l1)+'</h3><p style="margin:0">'+(grew?"Ta forêt s'agrandit : "+GN()+"×"+GN()+" emplacements pour de nouveaux aménagements.":"Chaque niveau rapproche la prochaine extension de ta forêt.")+'</p><button class="btn block" data-act="close">Continuer</button></div>');
+    if(tab==="cite")render();
+  },900)}
 }
 function checkPerfect(){
   if(S.perfect!==S.weekKey&&S.sport.length>=3&&S.goals.length>0&&S.goals.every(g=>g.s===1)){
@@ -728,10 +800,10 @@ const ICON={
 };
 const TABS=[
  ["cite","Forêt",'<path d="M3 21h18M5 21V10l7-5 7 5v11M9 21v-6h6v6"/>'],
- ["defis","Défis",'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><path d="M12 12l7-7"/>'],
+ ["defis","Semaine",'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><path d="M12 12l7-7"/>'],
  ["repas","Repas",'<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>'],
  ["corps","Corps",'<rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 9a4 4 0 0 1 8 0M12 9l2.5-2.5"/>'],
- ["otium","Otium",'<path d="M5 4h10a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3zM5 17a3 3 0 0 1 3-3h10"/>']
+ ["otium","Loisirs",'<path d="M5 4h10a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3zM5 17a3 3 0 0 1 3-3h10"/>']
 ];
 let tab="cite",lfilter="all";
 
@@ -739,10 +811,11 @@ function renderHead(){
   const l=lvlOf(S.xp),a=60*(l-1)*(l-1),b=60*l*l,p=Math.max(0,Math.min(100,(S.xp-a)/(b-a)*100));
   $("#head").innerHTML='<div class="lvl num" aria-label="Niveau '+l+'">'+l+'</div>'+
    '<div class="who"><b>'+rank(l)+'</b><div class="bar sea" role="progressbar" aria-label="Expérience" aria-valuenow="'+Math.round(p)+'" aria-valuemin="0" aria-valuemax="100"><i style="width:'+p+'%"></i></div></div>'+
-   '<div class="pill num" title="Glands">'+ICON.den+S.den+'</div><div class="pill num" title="Lucioles">'+ICON.reel+S.reels+'</div>';
+   '<div class="pill num" title="Glands">'+ICON.den+S.den+'</div>';
 }
 function renderTabs(){
-  $("#tabs").innerHTML=TABS.map(t=>'<button class="tab" data-act="tab" data-a="'+t[0]+'"'+(tab===t[0]?' aria-current="page"':'')+'><svg viewBox="0 0 24 24" aria-hidden="true">'+t[2]+'</svg>'+t[1]+'</button>').join("");
+  const todo=S.sport.length<3||S.goals.some(g=>!g.s);
+  $("#tabs").innerHTML=TABS.map(t=>'<button class="tab" data-act="tab" data-a="'+t[0]+'"'+(tab===t[0]?' aria-current="page"':'')+'><svg viewBox="0 0 24 24" aria-hidden="true">'+t[2]+'</svg>'+t[1]+(t[0]==="defis"&&todo&&tab!=="defis"?'<span class="dot" aria-label="À faire"></span>':'')+'</button>').join("");
 }
 function render(){
   renderHead();renderTabs();
@@ -753,11 +826,11 @@ function render(){
 
 function sportStatus(){
   const n=S.sport.length,left=daysLeft(),need=Math.max(0,3-n);
-  let tone="tone-ok",msg="Forêt protégée cette semaine. Chaque séance en plus rapporte encore.";
+  let tone="tone-ok",msg="Ta forêt est protégée cette semaine. Chaque séance en plus rapporte des points.";
   if(n<3){
-    if(need>left){tone="tone-bad";msg="Trop tard pour les 3 séances. Une péripétie frappera lundi, mais tu peux réduire les dégâts en t'y mettant."}
-    else if(need===left){tone="tone-warn";msg="Dernière chance : il faut une séance par jour jusqu'à dimanche."}
-    else{tone="tone-warn";msg="Encore "+need+" séance"+(need>1?"s":"")+" avant dimanche pour protéger ta forêt."}
+    if(need>left){tone="tone-bad";msg="Trop tard pour atteindre 3 séances : un orage touchera ta forêt lundi. Chaque séance en plus répare un aménagement."}
+    else if(need===left){tone="tone-warn";msg="Dernière chance : une séance par jour jusqu'à dimanche."}
+    else{tone="tone-warn";msg="Encore "+need+" séance"+(need>1?"s":"")+" avant dimanche pour protéger ta forêt d'un orage."}
   }
   const slots=[0,1,2].map(i=>'<div class="slot'+(i<n?' on':'')+'">'+(i<n?ICON.laurel:'')+'</div>').join("");
   return {n,tone,msg,slots};
@@ -769,15 +842,21 @@ function evoInfo(){
 }
 function vCite(){
   initC3();
-  const cs=cityStats(),ev=evoInfo(),N=GN(),c=(N-1)/2;
+  const cs=cityStats(),ev=evoInfo(),N=GN(),c=(N-1)/2,ss=sportStatus(),pr=ss.n>=3?{k:'ok',t:'Forêt protégée'}:ss.tone==='tone-bad'?{k:'bad',t:'Orage lundi'}:{k:'warn',t:'Séances '+ss.n+' sur 3'};
   const free=S.grid.some((b,i)=>!b&&!isRoad(i));
   return '<div class="stage'+(C3.ok?'':' fb')+'"><div id="c3slot">'+(C3.ok?'':cityScene())+'</div><div class="hud">'+
-   '<div class="hud-top"><span class="hchip gold">'+cs.r+'</span><span class="hchip num">'+cs.pop+' amis</span><span class="hchip num">'+cs.pr+' harmonie</span></div>'+
+   '<div class="hud-top"><button class="hchip '+pr.k+'" data-act="tab" data-a="defis">'+pr.t+'</button><span class="hchip gold">'+cs.r+'</span><span class="hchip num">'+cs.pop+' amis</span><span class="hchip num">'+cs.pr+' harmonie</span></div>'+
    '<div class="hud-bot"><div class="row sp"><div><div class="cap">Ta forêt · '+N+'×'+N+'</div><div style="font:700 15px var(--f-d);margin-top:2px">Niveau '+lvlOf(S.xp)+' · '+rank(lvlOf(S.xp))+'</div></div>'+(free?'<button class="btn sm" data-act="amenager">Aménager</button>':'')+'</div>'+
    '<div><div class="bar gold" role="progressbar" aria-label="Prochaine extension" aria-valuenow="'+Math.round(ev.pct)+'" aria-valuemin="0" aria-valuemax="100"><i style="width:'+ev.pct+'%"></i></div><div class="evo">'+ev.txt+'</div></div></div>'+
    '</div></div>';
 }
 
+function weekStrip(){
+  const t=today(),L=["L","M","M","J","V","S","D"];
+  return '<div class="wk" role="img" aria-label="Séances de la semaine">'+L.map((l,i)=>{
+    const d=addDays(S.weekKey,i),n=S.sport.filter(x=>x.date===d).length,cls=n?"on":d===t?"now":d<t?"past":"";
+    return '<div class="wd '+cls+'"><span>'+l+'</span><i>'+(n?ICON.laurel:'')+'</i></div>'}).join("")+'</div>';
+}
 function vDefis(){
   const n=S.sport.length,st=sportStatus();
   const tot=S.goals.length+1,done=S.goals.filter(g=>g.s===1).length+(n>=3?1:0);
@@ -785,12 +864,13 @@ function vDefis(){
     const s0=g.s||0,tag=s0===1?'<span class="chip" style="--k:var(--olive)">Validé</span>':s0===-1?'<span class="chip" style="--k:var(--danger)">Pas fait</span>':'';
     const acts=s0?'<button class="x" data-act="gres" data-a="'+g.id+'">Changer</button>':'<div class="row" style="gap:8px"><button class="btn ghost sm" data-act="gno" data-a="'+g.id+'">Pas fait</button><button class="btn sm" data-act="gok" data-a="'+g.id+'">Validé</button></div>';
     return '<div class="card goal'+(s0===1?' okc':'')+'"><div class="row sp"><h3>'+esc(g.t)+'</h3>'+tag+'</div><div class="row sp" style="margin-top:12px"><button class="x" data-act="goaledit" data-a="'+g.id+'">Modifier</button>'+acts+'</div></div>'}).join("");
-  const comp=S.comp.map(g=>{const p=Math.min(100,g.d/g.n*100);return '<div class="card goal"><div class="row sp"><h3>'+esc(g.t)+'</h3><span class="num mute" style="font-weight:800">'+g.d+'/'+g.n+'</span></div><div class="bar sea"><i style="width:'+p+'%"></i></div><div class="row sp"><span class="small mute">+5 XP, 3 gl. par séance</span><div class="stepper"><button class="btn ghost sm" data-act="cminus" data-a="'+g.id+'" aria-label="Retirer un">−</button><button class="btn sm" data-act="cplus" data-a="'+g.id+'"'+(g.d>=g.n?' disabled':'')+'>+1</button></div></div></div>'}).join("");
-  return '<section class="card flat"><div class="cap">Objectifs de la semaine</div><div class="row sp" style="margin-top:6px"><h2 style="font-size:18px">'+done+' sur '+tot+' atteints</h2><span class="chip" style="--k:var(--gold)">'+(S.perfect===S.weekKey?'Semaine parfaite':'Bonus : +60 gl., 2 lucioles')+'</span></div><div class="bar gold" style="margin-top:10px"><i style="width:'+(done/tot*100)+'%"></i></div></section>'+
-   '<div class="card goal"><div class="cap">Semaine du '+fmt(S.weekKey)+'</div><div class="row sp" style="margin-top:4px"><h3>Salle de sport · 3 séances</h3><span class="num mute" style="font-weight:800">'+n+'/3</span></div><div class="small '+st.tone+'" style="font-weight:700;margin:6px 0 12px">'+st.msg+'</div><div class="row sp"><div class="slots" aria-label="'+n+' séances sur 3">'+st.slots+'</div><button class="btn" data-act="sport">Séance faite</button></div><div style="margin-top:8px"><button class="x" data-act="sundo"'+(n?'':' disabled')+'>Annuler la dernière</button></div></div>'+
-   '<div class="cap" style="margin:18px 2px 8px">Complémentaires · hors semaine parfaite</div>'+comp+
-   '<div class="cap" style="margin:18px 2px 8px">Mes objectifs de la semaine · '+S.goals.length+' sur 3 max</div>'+(S.goals.length?'':'<div class="empty-note">Saisis tes objectifs de la semaine (3 maximum). Ils apparaîtront ici en cartes, à valider en fin de semaine.</div>')+goals+
-   (S.goals.length<3?'<button class="btn ghost block" style="margin-top:14px" data-act="goaledit" data-a="">Saisir un objectif</button>':'<p class="small mute" style="margin:12px 2px 0">3 objectifs maximum cette semaine.</p>');
+  const comp=S.comp.map(g=>{const p=Math.min(100,g.d/g.n*100);return '<div class="card goal"><div class="row sp"><h3>'+esc(g.t)+'</h3><span class="num mute" style="font-weight:800">'+g.d+' sur '+g.n+'</span></div><div class="bar sea" style="margin-top:10px"><i style="width:'+p+'%"></i></div><div class="row sp" style="margin-top:10px"><span class="small mute">+5 XP et 3 glands à chaque fois</span><div class="stepper"><button class="btn ghost sm" data-act="cminus" data-a="'+g.id+'" aria-label="Retirer un">−</button><button class="btn sm" data-act="cplus" data-a="'+g.id+'"'+(g.d>=g.n?' disabled':'')+'>+1</button></div></div></div>'}).join("");
+  return '<section class="card flat"><div class="row sp"><div><h2 style="font-size:20px">Ta semaine</h2><div class="small mute">Du '+fmt(S.weekKey)+' au '+fmt(addDays(S.weekKey,6))+'</div></div><span class="chip" style="--k:var(--gold)">'+done+' sur '+tot+' validés</span></div><div style="margin-top:14px">'+weekStrip()+'</div><div class="bar gold" style="margin-top:14px"><i style="width:'+(done/tot*100)+'%"></i></div><p class="small mute" style="margin:8px 0 0">'+(S.perfect===S.weekKey?'Semaine parfaite réussie. Bravo !':'Semaine parfaite : 3 séances et tous tes objectifs validés. Récompense : 60 glands.')+'</p></section>'+
+   '<div class="card goal"><div class="row sp"><h3>Salle de sport</h3><span class="num mute" style="font-weight:800">'+n+' sur 3</span></div><div class="small '+st.tone+'" style="font-weight:700;margin:6px 0 12px">'+st.msg+'</div><button class="btn block" data-act="sport">Séance faite</button><div style="margin-top:8px"><button class="x" data-act="sundo"'+(n?'':' disabled')+'>Annuler la dernière séance</button></div></div>'+
+   '<h3 style="font-size:17px;margin:22px 2px 2px">Mes objectifs · '+S.goals.length+' sur 3</h3><p class="small mute" style="margin:0 2px 8px">Choisis jusqu\'à 3 objectifs pour cette semaine, puis valide-les une fois accomplis.</p>'+
+   (S.goals.length?'':'<div class="empty-note">Aucun objectif pour l\'instant. Ajoutes-en un, par exemple « Méditer 10 minutes chaque soir ».</div>')+goals+
+   (S.goals.length<3?'<button class="btn ghost block" style="margin-top:14px" data-act="goaledit" data-a="">Ajouter un objectif</button>':'')+
+   '<h3 style="font-size:17px;margin:22px 2px 2px">Bonus</h3><p class="small mute" style="margin:0 2px 8px">Ils rapportent des points, mais ne comptent pas pour la semaine parfaite.</p>'+comp;
 }
 
 function dayMeals(d){return S.meals.filter(m=>m.date===d)}
@@ -805,7 +885,7 @@ function vRepas(){
    (photo?'<label class="btn" for="photo" style="flex:1">Prendre une photo</label><input id="photo" type="file" accept="image/*" capture="environment" hidden><label class="btn sea" for="photo2" style="flex:1">Depuis la galerie</label><input id="photo2" type="file" accept="image/*" hidden>':'<button class="btn" style="flex:1" data-act="mkey">Activer l\'analyse photo</button>')+
    '<button class="btn ghost" style="flex:1 1 100%" data-act="mealmanual">Ajouter à la main</button></div>'+
    (eng==="mistral"?'<p class="disc">Analyse par Mistral (gratuit). <button class="x" data-act="mkey">Clé API</button></p>':!photo?'<p class="disc">Analyse gratuite par photo avec Mistral : une clé API gratuite suffit.</p>':'')+
-   '<section class="card"><div class="cap">Repas du jour</div>'+(td.length?td.map(mealItem).join(""):'<div class="empty-note">Aucun repas enregistré. Prends ton assiette en photo, je m\'occupe du reste.</div>')+'</section>'+
+   '<section class="card"><div class="cap">Repas du jour</div>'+(td.length?td.map(mealItem).join(""):'<div class="empty-note">Pas encore de repas aujourd\'hui. Prends ton assiette en photo : j\'estime les calories et les macros.</div>')+'</section>'+
    (days.length?'<section class="card"><div class="cap">Jours précédents</div>'+days.map(d=>'<div class="item"><div class="grow"><b>'+fmt(d[0],{weekday:"long",day:"numeric",month:"short"})+'</b><div class="small mute">'+d[1]+' repas</div></div><b class="num">'+Math.round(d[2])+' kcal</b></div>').join("")+'</section>':'')+
    (caps.dl?'<button class="btn sea block" style="margin-top:14px" data-act="export">Exporter le bilan pour un professionnel de santé</button>':'')+
    '<p class="disc">Calories et nutriments estimés par IA à partir d\'une photo : ce sont des ordres de grandeur, à valider avec ton professionnel de santé.</p>';
@@ -898,7 +978,7 @@ function vOtium(){
   const list=S.leisure.filter(x=>lfilter==="all"||x.kind===lfilter).slice().reverse();
   const wk=S.leisure.filter(x=>x.status==="fini"&&x.date>=S.weekKey).length;
   const seg=[["all","Tout"]].concat(Object.keys(KINDS).map(k=>[k,KINDS[k]+"s"])).map(s=>'<button class="btn sm '+(lfilter===s[0]?'sea':'ghost')+'" data-act="lfilter" data-a="'+s[0]+'">'+s[1]+'</button>').join("");
-  return '<section class="card flat"><div class="cap">Otium · le temps pour toi</div><div class="row sp" style="margin-top:4px"><h2 style="font-size:18px">'+wk+' terminé'+(wk>1?'s':'')+' cette semaine</h2><button class="btn" data-act="leisureadd">Ajouter</button></div></section>'+
+  return '<section class="card flat"><div class="cap">Livres, musique, films, séries</div><div class="row sp" style="margin-top:4px"><h2 style="font-size:18px">'+wk+' terminé'+(wk>1?'s':'')+' cette semaine</h2><button class="btn" data-act="leisureadd">Ajouter</button></div></section>'+
    '<div class="seg" style="margin-top:14px">'+seg+'</div>'+
    '<section class="card" style="margin-top:6px">'+(list.length?list.map(x=>'<div class="item"><div class="grow"><div class="row" style="gap:8px;flex-wrap:wrap"><span class="chip k-'+x.kind+'">'+KINDS[x.kind]+'</span><span class="small mute">'+fmt(x.date)+'</span></div><h4 style="margin-top:6px">'+esc(x.title)+'</h4>'+(x.rating?'<div style="color:var(--gold-d);letter-spacing:2px" aria-label="'+x.rating+' sur 5">'+stars(x.rating)+'</div>':'')+(x.note?'<div class="small mute" style="margin-top:2px">'+esc(x.note)+'</div>':'')+'<button class="x" data-act="leisuredel" data-a="'+x.id+'" style="padding-left:0">Supprimer</button></div>'+(x.status==="cours"?'<button class="btn sm sea" data-act="leisurefin" data-a="'+x.id+'">Terminé</button>':'<span class="chip" style="--k:var(--olive)">Terminé</span>')+'</div>').join(""):'<div class="empty-note">Rien ici pour l\'instant. Note le livre que tu lis, la musique du moment, le film de ce soir.</div>')+'</section>';
 }
@@ -931,7 +1011,7 @@ function sheetSport(){
 }
 function sheetGoal(id){
   const g=S.goals.find(x=>x.id===id);
-  openSheet(g?"Modifier l'objectif":"Objectif de la semaine",'<div class="form"><label class="f">Objectif<input id="gt" maxlength="60" value="'+esc(g?g.t:"")+'" placeholder="Ex. Méditer 10 minutes"></label><button class="btn block" data-act="goalsave" data-a="'+(id||"")+'">Enregistrer</button>'+(g?'<button class="btn ghost block" data-act="goaldel" data-a="'+id+'">Supprimer cet objectif</button>':'')+'</div>');
+  openSheet(g?"Modifier l'objectif":"Objectif de la semaine",'<div class="form"><label class="f">Objectif<input id="gt" maxlength="60" value="'+esc(g?g.t:"")+'" placeholder="Ex. Méditer 10 minutes"></label><button class="btn block" data-act="goalsave" data-a="'+(id||"")+'">'+(g?"Enregistrer":"Ajouter l'objectif")+'</button>'+(g?'<button class="btn ghost block" data-act="goaldel" data-a="'+id+'">Supprimer cet objectif</button>':'')+'</div>');
 }
 function sheetBody(){
   const f=(id,l,k)=>'<label class="f">'+l+'<input id="'+id+'" inputmode="decimal" placeholder="—" value="'+(lastVal(k)!=null?fn(lastVal(k)):"")+'"></label>';
@@ -946,7 +1026,7 @@ function sheetMealForm(m,info){
 }
 function sheetLeisure(){
   window.__rate=0;
-  openSheet("Ajouter à l'Otium",'<div class="form"><label class="f">Type<select id="l_kind">'+Object.keys(KINDS).map(k=>'<option value="'+k+'">'+KINDS[k]+'</option>').join("")+'</select></label><label class="f">Titre<input id="l_title" maxlength="80" placeholder="Ex. Dune, Radiohead, Perfect Days"></label><label class="f">Statut<select id="l_st"><option value="cours">En cours</option><option value="fini">Terminé</option></select></label><div><div class="f" style="font-weight:700;font-size:13px;margin-bottom:2px">Note</div><div class="stars" id="stars">'+[1,2,3,4,5].map(n=>'<button type="button" data-act="star" data-a="'+n+'" aria-label="'+n+' sur 5">★</button>').join("")+'</div></div><label class="f">Un mot dessus<textarea id="l_note" maxlength="200"></textarea></label><button class="btn block" data-act="leisuresave">Ajouter · +4 XP</button></div>');
+  openSheet("Nouveau loisir",'<div class="form"><label class="f">Type<select id="l_kind">'+Object.keys(KINDS).map(k=>'<option value="'+k+'">'+KINDS[k]+'</option>').join("")+'</select></label><label class="f">Titre<input id="l_title" maxlength="80" placeholder="Ex. Dune, Radiohead, Perfect Days"></label><label class="f">Statut<select id="l_st"><option value="cours">En cours</option><option value="fini">Terminé</option></select></label><div><div class="f" style="font-weight:700;font-size:13px;margin-bottom:2px">Note</div><div class="stars" id="stars">'+[1,2,3,4,5].map(n=>'<button type="button" data-act="star" data-a="'+n+'" aria-label="'+n+' sur 5">★</button>').join("")+'</div></div><label class="f">Un mot dessus<textarea id="l_note" maxlength="200"></textarea></label><button class="btn block" data-act="leisuresave">Ajouter · +4 XP</button></div>');
 }
 function sheetPending(){
   const ev=S.pending[0];if(!ev)return;
@@ -1113,6 +1193,9 @@ async function syncPull(){
   if(r.status===200&&r.j.doc){S=r.j.doc;migrate();rollWeek();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}rs.st="ok";rs.t=Date.now();closeSheet();render();toast("Données récupérées")}else toast("Serveur injoignable");
 }
 async function syncPush(){await pushRemote();closeSheet();render();toast(rs.st==="ok"?"Synchronisation activée":"Serveur injoignable")}
+function sheetWelcome(){
+  openSheet("Bienvenue dans ta clairière",'<div style="display:grid;gap:12px"><p style="margin:0">Une petite île t\'attend. Elle grandit avec toi.</p><p style="margin:0"><b>Va à la salle 3 fois par semaine.</b> Chaque séance te rapporte des glands pour aménager la forêt. Si tu en rates, un orage abîme tes aménagements.</p><p style="margin:0"><b>Valide tes objectifs</b> dans l\'onglet Semaine, note tes repas et tes mesures : tout fait monter ton niveau et agrandit l\'île.</p><button class="btn block" data-act="welcome" data-a="goals">Choisir mes objectifs</button><button class="btn ghost block" data-act="welcome">Découvrir la forêt</button></div>');
+}
 /* rappel de sauvegarde hebdomadaire */
 function backupDue(){
   if(!(S.xp>0||S.body.length||S.meals.length))return false;
@@ -1201,6 +1284,7 @@ function act(a,x,y,el){
   case "bodydel":S.body=S.body.filter(b=>b.date!==x);persist();render();break;
   case "export":exportBilan();break;
   case "backup":backupData();break;
+  case "welcome":S.welcomed=1;persist();closeSheet();if(x==="goals"){tab="defis";render();sheetGoal("")}break;
   case "backuplater":S.backupSnooze=today();persist();closeSheet();break;
   case "syncopen":sheetSync();break;
   case "syncsave":{const c=val("sc").trim();if(!c){toast("Entre ton code");return}syncConnect(c);break}
@@ -1226,7 +1310,7 @@ document.addEventListener("change",e=>{if(e.target&&e.target.id==="restore"&&e.t
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("#sheet").hidden)closeSheet();if((e.key==="Enter"||e.key===" ")&&e.target.getAttribute&&e.target.getAttribute("role")==="button"&&e.target.dataset&&e.target.dataset.act){e.preventDefault();act(e.target.dataset.act,e.target.dataset.a,e.target.dataset.b,e.target)}});
 
 /* ---------- démarrage ---------- */
-function migrate(){const f=fresh();Object.keys(f).forEach(k=>{if(S[k]===undefined)S[k]=f[k]});S.grid.forEach(b=>{if(b&&MAPK[b.t])b.t=MAPK[b.t]});growIfNeeded()}
+function migrate(){const f=fresh();if(S.welcomed===undefined&&(S.xp>0||(S.body&&S.body.length)||(S.meals&&S.meals.length)))S.welcomed=1;Object.keys(f).forEach(k=>{if(S[k]===undefined)S[k]=f[k]});S.grid.forEach(b=>{if(b&&MAPK[b.t])b.t=MAPK[b.t]});growIfNeeded()}
 async function boot(){
   try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}
   S=loadLocal()||fresh();migrate();rollWeek();render();
@@ -1250,7 +1334,8 @@ async function boot(){
   if(!$("#sheet").hidden&&!S.pending.length){}else if(S.pending.length&&$("#sheet").hidden)sheetPending();
   if($("#sheet").hidden)render();else{renderHead();renderTabs()}
   if(syncCode())pullRemote();
-  if($("#sheet").hidden&&backupDue())setTimeout(()=>{if($("#sheet").hidden)sheetBackupReminder()},1200);
+  if(!S.welcomed&&$("#sheet").hidden)setTimeout(()=>{if($("#sheet").hidden&&!S.welcomed)sheetWelcome()},700);
+  if($("#sheet").hidden&&S.welcomed&&backupDue())setTimeout(()=>{if($("#sheet").hidden)sheetBackupReminder()},1200);
 }
 boot();
 })();
