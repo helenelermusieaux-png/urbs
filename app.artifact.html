@@ -590,7 +590,7 @@ const caps={sample:null,img:false,dl:null};
 function fresh(){
   const grid=Array(36).fill(null);
   grid[13]={t:"terrier",l:1,x:0};grid[25]={t:"chene",l:1,x:0};
-  return {v:1,xp:0,den:30,reels:1,weekKey:monday(),streak:0,perfect:"",sport:[],sportP:0,
+  return {v:1,xp:0,den:30,reels:1,weekKey:monday(),streak:0,perfect:"",sport:[],sportP:0,comp:[{id:"c1",t:"Mouvement Petit Bambou",n:3,d:0,p:0},{id:"c2",t:"MindDay",n:5,d:0,p:0}],
     goals:[{id:"g1",t:"Lire 20 minutes",n:5,d:0,p:0},{id:"g2",t:"Boire 1,5 L d'eau",n:7,d:0,p:0},{id:"g3",t:"Marcher 8 000 pas",n:5,d:0,p:0}],
     grid,log:[],pending:[],body:[],meals:[],leisure:[],eps:{},upd:0};
 }
@@ -665,7 +665,7 @@ function rollWeek(){
     if(sessions<3&&ev<2){S.pending.push(makeEvent(k,sessions));ev++}
     first=false;k=addDays(k,7);
   }
-  S.weekKey=cur;S.sport=[];S.bonus=[];S.sportP=0;S.goals.forEach(g=>{g.d=0;g.p=0});persist();
+  S.weekKey=cur;S.sport=[];S.bonus=[];S.comp.forEach(g=>{g.d=0;g.p=0});S.sportP=0;S.goals.forEach(g=>{g.d=0;g.p=0});persist();
 }
 function repairOne(){
   let best=-1;S.grid.forEach((b,i)=>{if(b&&b.x&&(best<0||CAT[b.t].pr>CAT[S.grid[best].t].pr))best=i});
@@ -727,8 +727,10 @@ function vDefis(){
   const n=S.sport.length;
   const tot=S.goals.length+1,done=S.goals.filter(g=>g.d>=g.n).length+(n>=3?1:0);
   const goals=S.goals.map(g=>{const p=Math.min(100,g.d/g.n*100);return '<div class="card goal"><div class="row sp"><h3>'+esc(g.t)+'</h3><span class="num mute" style="font-weight:800">'+g.d+'/'+g.n+'</span></div><div class="bar"><i style="width:'+p+'%"></i></div><div class="row sp"><button class="x" data-act="goaledit" data-a="'+g.id+'">Modifier</button><div class="stepper"><button class="btn ghost sm" data-act="gminus" data-a="'+g.id+'" aria-label="Retirer un">−</button><button class="btn sm" data-act="gplus" data-a="'+g.id+'"'+(g.d>=g.n?' disabled':'')+'>+1</button></div></div></div>'}).join("");
+  const comp=S.comp.map(g=>{const p=Math.min(100,g.d/g.n*100);return '<div class="card goal"><div class="row sp"><h3>'+esc(g.t)+'</h3><span class="num mute" style="font-weight:800">'+g.d+'/'+g.n+'</span></div><div class="bar sea"><i style="width:'+p+'%"></i></div><div class="row sp"><span class="small mute">+5 XP, 3 gl. par séance</span><div class="stepper"><button class="btn ghost sm" data-act="cminus" data-a="'+g.id+'" aria-label="Retirer un">−</button><button class="btn sm" data-act="cplus" data-a="'+g.id+'"'+(g.d>=g.n?' disabled':'')+'>+1</button></div></div></div>'}).join("");
   return '<section class="card flat"><div class="cap">Objectifs de la semaine</div><div class="row sp" style="margin-top:6px"><h2 style="font-size:18px">'+done+' sur '+tot+' atteints</h2><span class="chip" style="--k:var(--gold)">'+(S.perfect===S.weekKey?'Semaine parfaite':'Bonus : +60 gl., 2 lucioles')+'</span></div><div class="bar gold" style="margin-top:10px"><i style="width:'+(done/tot*100)+'%"></i></div></section>'+
    '<div class="card goal"><div class="row sp"><h3>Sport · 3 séances (fixe)</h3><span class="num mute" style="font-weight:800">'+n+'/3</span></div><div class="bar sea"><i style="width:'+Math.min(100,n/3*100)+'%"></i></div><div class="row sp"><button class="x" data-act="sundo"'+(n?'':' disabled')+'>Annuler la dernière</button><button class="btn sm" data-act="sport">Séance faite</button></div></div>'+
+   '<div class="cap" style="margin:18px 2px 8px">Complémentaires · hors semaine parfaite</div>'+comp+
    goals+'<button class="btn ghost block" style="margin-top:14px" data-act="goaledit" data-a="">Nouvel objectif</button>';
 }
 
@@ -814,7 +816,7 @@ function sheetTile(i){
   openSheet(c.n,'<div style="display:grid;gap:12px"><div class="big-art" style="'+(b.x?'filter:grayscale(.75)':'')+'">'+art(b.t,b.x)+'</div><p style="margin:0;text-align:center">'+c.d+'</p><div class="stats"><div class="stat"><b>'+b.l+'/3</b><span>niveau</span></div><div class="stat"><b>'+(b.x?0:c.pr*b.l)+'</b><span>harmonie</span></div><div class="stat"><b>'+c.pop*b.l+'</b><span>amis</span></div></div>'+acts+'<button class="btn ghost block" data-act="close">Fermer</button></div>');
 }
 function sheetSport(){
-  openSheet("Tu es allé à la salle ?",'<div style="display:grid;gap:8px">'+SPORTS.map(s=>'<button class="btn ghost block" data-act="sportlog" data-a="'+s+'">'+s+'</button>').join("")+'</div><p class="small mute" style="margin:14px 0 8px">Bonus (ne compte pas dans les 3 séances)</p><button class="btn ghost block" data-act="bonus">Mouvement Petit Bambou</button>');
+  openSheet("Tu es allé à la salle ?",'<div style="display:grid;gap:8px">'+SPORTS.map(s=>'<button class="btn ghost block" data-act="sportlog" data-a="'+s+'">'+s+'</button>').join("")+'</div>');
 }
 function sheetGoal(id){
   const g=S.goals.find(x=>x.id===id);
@@ -935,6 +937,8 @@ function act(a,x,y,el){
     if(S.sport.length>S.sportP){S.sportP=S.sport.length;if(S.sportP===3)gain(40,40,1,"Triomphe !");else gain(15,10,0,x+".")}
     const r=repairOne();if(r)m=" "+r+" est remis en état.";
     checkPerfect();persist();closeSheet();render();if(m)setTimeout(()=>toast("Remise en état :"+m),2400);break}
+  case "cplus":{const g=S.comp.find(q=>q.id===x);if(g&&g.d<g.n){g.d++;if(g.d>g.p){g.p=g.d;if(g.d===g.n)gain(15,8,0,g.t+" : objectif atteint !");else gain(5,3,0,g.t+".")}persist();render()}break}
+  case "cminus":{const g=S.comp.find(q=>q.id===x);if(g&&g.d>0){g.d--;persist();render()}break}
   case "bonus":{
     S.bonus=S.bonus||[];
     if(S.bonus.includes(today())){closeSheet();toast("Bonus déjà pris aujourd’hui.");break}
