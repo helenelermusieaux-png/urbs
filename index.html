@@ -711,7 +711,7 @@ function fresh(){
   grid[13]={t:"terrier",l:1,x:0};grid[25]={t:"chene",l:1,x:0};
   return {v:1,n:6,xp:0,den:30,reels:1,weekKey:monday(),streak:0,perfect:"",sport:[],sportP:0,comp:[{id:"c1",t:"Mouvement Petit Bambou",n:3,d:0,p:0},{id:"c2",t:"MindDay",n:5,d:0,p:0}],
     goals:[],
-    grid,log:[],pending:[],body:[],meals:[],leisure:[],eps:{},upd:0};
+    grid,log:[],pending:[],body:[],meals:[],cravings:[],leisure:[],eps:{},upd:0};
 }
 function loadLocal(){try{const r=localStorage.getItem(KEY);return r?JSON.parse(r):null}catch(e){return null}}
 let saveTimer=null,saving=false,again=false;
@@ -901,10 +901,37 @@ function vRepas(){
    (photo?'<label class="btn" for="photo" style="flex:1">Prendre une photo</label><input id="photo" type="file" accept="image/*" capture="environment" hidden><label class="btn sea" for="photo2" style="flex:1">Depuis la galerie</label><input id="photo2" type="file" accept="image/*" hidden>':'<button class="btn" style="flex:1" data-act="mkey">Activer l\'analyse photo</button>')+
    '<button class="btn" style="flex:1 1 100%" data-act="mealvoice">🎤 Dire mon repas</button><button class="btn ghost" style="flex:1 1 100%" data-act="mealmanual">Ajouter à la main</button></div>'+
    (eng==="mistral"?'<p class="disc">Analyse par Mistral (gratuit). <button class="x" data-act="mkey">Clé API</button></p>':!photo?'<p class="disc">Analyse gratuite par photo avec Mistral : une clé API gratuite suffit.</p>':'')+
-   '<section class="card"><div class="cap">Repas du jour</div>'+(td.length?td.map(mealItem).join(""):'<div class="empty-note">Pas encore de repas aujourd\'hui. Prends ton assiette en photo : j\'estime les calories et les macros.</div>')+'</section>'+
+   '<section class="card"><div class="cap">Repas du jour</div>'+(td.length?td.map(mealItem).join(""):'<div class="empty-note">Pas encore de repas aujourd\'hui. Prends ton assiette en photo : j\'estime les calories et les macros.</div>')+'</section>'+vCrav()+
    (days.length?'<section class="card"><div class="cap">Jours précédents</div>'+days.map(d=>'<div class="item"><div class="grow"><b>'+fmt(d[0],{weekday:"long",day:"numeric",month:"short"})+'</b><div class="small mute">'+d[1]+' repas</div></div><b class="num">'+Math.round(d[2])+' kcal</b></div>').join("")+'</section>':'')+
-   (caps.dl?'<button class="btn sea block" style="margin-top:14px" data-act="export">Exporter le bilan pour un professionnel de santé</button>':'')+
+   '<button class="btn sea block" style="margin-top:14px" data-act="export">Exporter le bilan pour un professionnel de santé</button>'+
    '<p class="disc">Calories et nutriments estimés par IA à partir d\'une photo : ce sont des ordres de grandeur, à valider avec ton professionnel de santé.</p>';
+}
+function vCrav(){
+  const wk=monday(),list=S.cravings.filter(c=>c.date>=wk),st=cravStats(list);
+  const sum=list.length?'<div class="small" style="margin:8px 0"><b>'+st.n+'</b> cette semaine'+(st.k?' · environ <b>'+st.k+'</b> kcal':'')+(st.emo.length?'<br>Émotions : '+st.emo.slice(0,3).map(e=>esc(e[0])).join(", "):'')+(st.slot[0]?'<br>Surtout : '+esc(st.slot[0][0].toLowerCase()):'')+'</div>':'<div class="empty-note">Rien de noté cette semaine. Si une envie arrive, tu peux la dire ici, sans jugement.</div>';
+  const last=S.cravings.slice().sort((a,b)=>(b.date+b.time).localeCompare(a.date+a.time)).slice(0,4).map(c=>'<div class="item"><div class="grow"><b>'+esc(c.nom)+'</b><div class="small mute">'+fmt(c.date,{day:"numeric",month:"short"})+' · '+esc(c.time)+(c.emo&&c.emo.length?' · '+esc(c.emo.join(", ")):'')+'</div></div><div style="text-align:right">'+(c.kcal?'<b class="num">'+Math.round(c.kcal)+'</b><div class="small mute">kcal</div>':'')+'<button class="x" data-act="cravdel" data-a="'+c.id+'">Retirer</button></div></div>').join("");
+  return '<section class="card"><div class="cap">Craquages et envies hors repas</div><p class="small mute" style="margin:4px 0 0">Noter ce qui s\'est passé et ce que tu ressentais aide à repérer les déclencheurs. Ça apparaît dans le bilan pour ton professionnel de santé.</p>'+sum+last+'<button class="btn ghost block" style="margin-top:10px" data-act="cravnew">🎤 Noter un craquage</button></section>';
+}
+function sheetCrav(){
+  window.__emo=[];
+  const chips=EMOS.map(e=>'<button type="button" class="chip" data-act="emo" data-a="'+e+'" style="cursor:pointer;border:2px solid var(--line)">'+e+'</button>').join(" ");
+  openSheet("Noter un craquage",'<div class="form"><p class="small mute" style="margin:0">Dis ce que tu as mangé et ce que tu ressentais, par exemple : « j\'ai mangé des biscuits devant la télé, j\'étais stressée après le travail ». Aucun jugement, c\'est juste pour mieux comprendre.</p>'+(SR?'<button class="btn sea block" id="vmic" data-act="voicego">🎤 Parler</button>':'')+'<label class="f">Ce qui s\'est passé<textarea id="v_txt" rows="4" maxlength="500" placeholder="Ce que j\'ai mangé, et pourquoi"></textarea></label>'+(engine()?'<button class="btn block" data-act="cravai">Laisser Mistral remplir (aliments, calories, émotions)</button>':'')+'<div id="c_info"></div><div><div class="f" style="font-weight:700;font-size:13px;margin-bottom:6px">Émotions (une ou plusieurs)</div><div style="display:flex;flex-wrap:wrap;gap:6px" id="emos">'+chips+'</div></div><label class="f">Aliments<input id="c_nom" maxlength="80" placeholder="Ex. biscuits, chocolat"></label><label class="f">Calories estimées (kcal, facultatif)<input id="c_kcal" inputmode="decimal"></label><button class="btn block" data-act="cravsave">Enregistrer</button></div>');
+}
+function emoPaint(){document.querySelectorAll("#emos [data-a]").forEach(b=>{const on=window.__emo.includes(b.dataset.a);b.style.background=on?"var(--leaf, #2E8C50)":"";b.style.color=on?"#fff":"";b.style.borderColor=on?"transparent":"var(--line)"})}
+async function cravAI(){
+  const t=document.getElementById("v_txt"),txt=t?t.value.trim():"";
+  if(!txt){toast("Dis ou écris d'abord ce qui s'est passé.");return}
+  if(recOn&&rec){try{rec.stop()}catch(e){}}
+  const info=document.getElementById("c_info");if(info)info.innerHTML='<div class="row"><div class="spin"></div><span class="small mute">Je lis ton récit…</span></div>';
+  const prompt="Tu es un soignant bienveillant. Voici ce qu'une personne raconte d'un craquage alimentaire : « "+txt.replace(/[«»]/g,"")+" ». Extrais l'information, sans jugement. Réponds uniquement par un objet JSON : {\"nom\":\"aliments mangés, court\",\"kcal\":300,\"emotions\":[],\"declencheur\":\"phrase courte sur la situation ou l'émotion\",\"remarque\":\"une phrase douce et encourageante\"}. Les émotions doivent venir uniquement de cette liste : "+EMOS.join(", ")+". kcal est une estimation de ce qui a été mangé, 0 si inconnu.";
+  try{
+    const r=engine()==='claude'?await caps.sample.json(prompt,{cache:false}):await mistralJSON(prompt,null);
+    window.__trig=String(r.declencheur||"").slice(0,160);
+    if(r.nom&&document.getElementById("c_nom")&&!document.getElementById("c_nom").value)document.getElementById("c_nom").value=String(r.nom).slice(0,80);
+    if(num(r.kcal)&&document.getElementById("c_kcal"))document.getElementById("c_kcal").value=Math.round(num(r.kcal));
+    (Array.isArray(r.emotions)?r.emotions:[]).forEach(e=>{if(EMOS.includes(e)&&!window.__emo.includes(e))window.__emo.push(e)});emoPaint();
+    if(info)info.innerHTML='<p class="small" style="margin:0">'+esc(r.remarque||"Merci de l'avoir noté.")+' <span class="mute">Vérifie et corrige si besoin.</span></p>';
+  }catch(e){if(info)info.innerHTML='<p class="small tone-bad" style="font-weight:700;margin:0">'+((e&&MERR[e.code])||"Analyse impossible.")+' Tu peux remplir à la main.</p>'}
 }
 function mealItem(m){
   return '<div class="item"><div class="grow"><b>'+esc(m.nom)+'</b><div class="small mute">'+esc(m.time)+' · '+esc(m.type)+' · P '+Math.round(m.p||0)+' · G '+Math.round(m.g||0)+' · L '+Math.round(m.l||0)+'</div></div><div style="text-align:right"><b class="num">'+Math.round(m.kcal||0)+'</b><div class="small mute">kcal</div><button class="x" data-act="mealdel" data-a="'+m.id+'">Retirer</button></div></div>';
@@ -1270,16 +1297,32 @@ async function restoreData(file){
 }
 /* export */
 function csv(rows){return "﻿"+rows.map(r=>r.map(c=>{c=c==null?"":String(c);return /[;"\n]/.test(c)?'"'+c.replace(/"/g,'""')+'"':c}).join(";")).join("\r\n")}
+function dlSave(filename,data,mime){
+  if(caps.dl)return caps.dl.save({filename,data});
+  return new Promise((ok,ko)=>{try{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([data],{type:mime||"text/csv;charset=utf-8"}));a.download=filename;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1500);ok()}catch(e){ko(e)}});
+}
+const EMOS=["Stress","Fatigue","Ennui","Tristesse","Colère","Frustration","Anxiété","Solitude","Récompense","Habitude"];
+const slot=t=>{const h=parseInt(String(t).slice(0,2),10);return h<6?"Nuit":h<12?"Matin":h<18?"Après-midi":"Soir"};
+function top(arr){const c={};arr.forEach(x=>c[x]=(c[x]||0)+1);const e=Object.entries(c).sort((a,b)=>b[1]-a[1]);return e}
+function cravStats(list){
+  return {n:list.length,k:Math.round(list.reduce((a,c)=>a+(c.kcal||0),0)),emo:top([].concat(...list.map(c=>c.emo||[]))),slot:top(list.map(c=>slot(c.time)))};
+}
 function exportBilan(){
-  if(!caps.dl)return;
-  const rows=[["BILAN DE SUIVI — généré le "+fmt(today(),{day:"numeric",month:"long",year:"numeric"})],["Mesures saisies par la personne. Calories et nutriments estimés par IA à partir de photos : valeurs indicatives."],[],["MESURES CORPORELLES"],["Date","Poids (kg)","Taille (cm)","Tour de taille (cm)","Hanches (cm)","Poitrine (cm)","Bras (cm)","Cuisse (cm)","IMC"]];
+  const rows=[["BILAN DE SUIVI — généré le "+fmt(today(),{day:"numeric",month:"long",year:"numeric"})],["Mesures saisies par la personne. Calories et nutriments estimés par IA à partir de photos ou de descriptions orales : valeurs indicatives. Les craquages et émotions sont déclarés par la personne."],[],["MESURES CORPORELLES"],["Date","Poids (kg)","Taille (cm)","Tour de taille (cm)","Hanches (cm)","Poitrine (cm)","Bras (cm)","Cuisse (cm)","IMC"]];
   S.body.forEach(b=>{const i=b.poids&&b.taille?b.poids/Math.pow(b.taille/100,2):null;rows.push([b.date,fn(b.poids),fn(b.taille),fn(b.ventre),fn(b.hanches),fn(b.poitrine),fn(b.bras),fn(b.cuisse),fn(i)])});
   rows.push([],["TOTAUX PAR JOUR"],["Date","Repas","kcal","Protéines (g)","Glucides (g)","Lipides (g)","Fibres (g)"]);
   const ds=Array.from(new Set(S.meals.map(m=>m.date))).sort();
   ds.forEach(d=>{const ms=dayMeals(d),t=sumM(ms);rows.push([d,ms.length,Math.round(t.k),Math.round(t.p),Math.round(t.g),Math.round(t.l),Math.round(t.f)])});
   rows.push([],["JOURNAL DES REPAS"],["Date","Heure","Moment","Plat","kcal","Protéines (g)","Glucides (g)","Lipides (g)","Fibres (g)"]);
   S.meals.slice().sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time)).forEach(m=>rows.push([m.date,m.time,m.type,m.nom,Math.round(m.kcal||0),Math.round(m.p||0),Math.round(m.g||0),Math.round(m.l||0),Math.round(m.f||0)]));
-  caps.dl.save({filename:"bilan-sante-"+today()+".csv",data:csv(rows)}).then(()=>toast("Bilan enregistré")).catch(e=>{if(!e||e.code!=="declined")toast("Export impossible ici")});
+  rows.push([],["CRAQUAGES ET ENVIES HORS REPAS — SYNTHÈSE PAR SEMAINE"],["Semaine du","Nombre","kcal estimées","Émotions les plus citées","Moment le plus fréquent"]);
+  const wk={};S.cravings.forEach(c=>{const w=monday(c.date);(wk[w]=wk[w]||[]).push(c)});
+  Object.keys(wk).sort().forEach(w=>{const st=cravStats(wk[w]);rows.push([w,st.n,st.k,st.emo.slice(0,3).map(e=>e[0]+" ("+e[1]+")").join(", "),st.slot[0]?st.slot[0][0]:""])});
+  const all=cravStats(S.cravings);
+  rows.push([],["Émotions associées (total)"],["Émotion","Fois"]);all.emo.forEach(e=>rows.push([e[0],e[1]]));
+  rows.push([],["JOURNAL DES CRAQUAGES"],["Date","Heure","Ce qui a été mangé","kcal estimées","Émotions","Déclencheur noté"]);
+  S.cravings.slice().sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time)).forEach(c=>rows.push([c.date,c.time,c.nom,Math.round(c.kcal||0),(c.emo||[]).join(", "),c.trig||""]));
+  dlSave("bilan-sante-"+today()+".csv",csv(rows)).then(()=>toast("Bilan enregistré")).catch(e=>{if(!e||e.code!=="declined")toast("Export impossible ici")});
 }
 
 /* ---------- actions ---------- */
@@ -1320,6 +1363,13 @@ function act(a,x,y,el){
     persist();closeSheet();render();break}
   case "goaldel":S.goals=S.goals.filter(q=>q.id!==x);persist();closeSheet();render();break;
   case "mealmanual":sheetMealForm();break;
+  case "cravnew":sheetCrav();break;
+  case "emo":{const i=window.__emo.indexOf(x);if(i>=0)window.__emo.splice(i,1);else window.__emo.push(x);emoPaint();break}
+  case "cravai":cravAI();break;
+  case "cravsave":{const txt=val("v_txt").trim(),nom=val("c_nom").trim()||txt.slice(0,50);if(!nom&&!(window.__emo||[]).length){toast("Dis ou écris ce qui s'est passé.");return}
+    S.cravings.push({id:uid(),date:today(),time:nowHM(),txt:txt.slice(0,500),nom:nom||"Craquage",kcal:num(val("c_kcal"))||0,emo:(window.__emo||[]).slice(),trig:window.__trig||""});
+    window.__trig="";persist();closeSheet();render();toast("Noté. Merci de l'avoir dit.");break}
+  case "cravdel":S.cravings=S.cravings.filter(c=>c.id!==x);persist();render();break;
   case "mealvoice":if(!engine())sheetMistral();else sheetVoice();break;
   case "voicego":voiceToggle();break;
   case "voiceok":analyseText();break;
