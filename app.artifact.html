@@ -120,6 +120,12 @@ svg .wts{stroke:var(--water);fill:none;stroke-width:2.2;stroke-linecap:round}
 .stage .c3{aspect-ratio:auto;max-height:none;border-radius:0}
 .stage .c3btn{top:50%;bottom:auto;right:10px;transform:translateY(-50%);flex-direction:column;z-index:2}
 .stage.fb,.stage.fb #c3slot{height:auto!important;min-height:0}
+.stage.mini,.stage.mini #c3slot{height:168px!important;min-height:0}.stage.mini{margin-top:0}.stage.mini .c3btn{display:none}
+.mini-hit{position:absolute;inset:0;z-index:4;background:transparent;border:0;cursor:pointer;display:flex;align-items:flex-end;justify-content:space-between;padding:10px 14px;text-align:left}
+.mini-hit span{font:800 13px var(--f-b);background:color-mix(in srgb,var(--card) 88%,transparent);border:2px solid var(--line);border-radius:99px;padding:4px 12px;color:var(--ink)}
+.step{display:flex;gap:12px;align-items:center;padding:12px 0;border-top:2px solid var(--line)}.step:first-of-type{border-top:0}
+.step .tick{flex:none;width:28px;height:28px;border-radius:50%;border:3px solid var(--line);display:grid;place-items:center;font:900 15px var(--f-b);color:#fff}
+.step.done .tick{background:var(--olive,#2E8C50);border-color:transparent}
 .stage.fb .hud{position:static;padding:10px}
 .stage.fb::after{display:none}
 .hud{position:absolute;inset:0;z-index:3;display:flex;flex-direction:column;justify-content:space-between;padding:10px;pointer-events:none}
@@ -472,7 +478,7 @@ function initC3(){
     cv.addEventListener("webglcontextlost",e=>e.preventDefault());
     cv.addEventListener("webglcontextrestored",()=>{C3.theme="";C3.sig="";syncC3()});
     if(window.matchMedia)matchMedia("(prefers-color-scheme: dark)").addEventListener("change",()=>{C3.theme="";if(C3.on)syncC3()});
-    document.addEventListener("visibilitychange",()=>{if(document.hidden)stop3();else if(tab==="cite"&&C3.wrap&&C3.wrap.isConnected)start3()});
+    document.addEventListener("visibilitychange",()=>{if(document.hidden)stop3();else if((tab==="cite"||tab==="today")&&C3.wrap&&C3.wrap.isConnected)start3()});
     C3.ok=true;
   }catch(err){C3.ok=false}
   return C3.ok;
@@ -744,7 +750,7 @@ function gain(xp,den,reels,msg){
   if(l1>l0){const grew=growIfNeeded();setTimeout(()=>{
     if(!$("#sheet").hidden){toast("Niveau "+l1+" · "+rank(l1));return}
     openSheet("Niveau supérieur",'<div style="text-align:center;display:grid;gap:12px;justify-items:center"><div class="lvl num" style="width:88px;height:88px;font-size:38px">'+l1+'</div><h3 style="font-size:22px">'+rank(l1)+'</h3><p style="margin:0">'+(grew?"Ta forêt s'agrandit : "+GN()+"×"+GN()+" emplacements pour de nouveaux aménagements.":"Chaque niveau rapproche la prochaine extension de ta forêt.")+'</p><button class="btn block" data-act="close">Continuer</button></div>');
-    if(tab==="cite")render();
+    if(tab==="cite"||tab==="today")render();
   },900)}
 }
 function checkPerfect(){
@@ -799,13 +805,13 @@ const ICON={
  laurel:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg>'
 };
 const TABS=[
+ ["today","Aujourd'hui",'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><path d="M12 12l7-7"/>'],
  ["cite","Forêt",'<path d="M3 21h18M5 21V10l7-5 7 5v11M9 21v-6h6v6"/>'],
- ["defis","Semaine",'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><path d="M12 12l7-7"/>'],
  ["repas","Repas",'<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>'],
  ["corps","Corps",'<rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 9a4 4 0 0 1 8 0M12 9l2.5-2.5"/>'],
  ["otium","Loisirs",'<path d="M5 4h10a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3zM5 17a3 3 0 0 1 3-3h10"/>']
 ];
-let tab="cite",lfilter="all";
+let tab="today",lfilter="all";
 
 function renderHead(){
   const l=lvlOf(S.xp),a=60*(l-1)*(l-1),b=60*l*l,p=Math.max(0,Math.min(100,(S.xp-a)/(b-a)*100));
@@ -815,13 +821,13 @@ function renderHead(){
 }
 function renderTabs(){
   const todo=S.sport.length<3||S.goals.some(g=>!g.s);
-  $("#tabs").innerHTML=TABS.map(t=>'<button class="tab" data-act="tab" data-a="'+t[0]+'"'+(tab===t[0]?' aria-current="page"':'')+'><svg viewBox="0 0 24 24" aria-hidden="true">'+t[2]+'</svg>'+t[1]+(t[0]==="defis"&&todo&&tab!=="defis"?'<span class="dot" aria-label="À faire"></span>':'')+'</button>').join("");
+  $("#tabs").innerHTML=TABS.map(t=>'<button class="tab" data-act="tab" data-a="'+t[0]+'"'+(tab===t[0]?' aria-current="page"':'')+'><svg viewBox="0 0 24 24" aria-hidden="true">'+t[2]+'</svg>'+t[1]+(t[0]==="today"&&todo&&tab!=="today"?'<span class="dot" aria-label="À faire"></span>':'')+'</button>').join("");
 }
 function render(){
   renderHead();renderTabs();
-  $("#view").innerHTML=({cite:vCite,defis:vDefis,repas:vRepas,corps:vCorps,otium:vOtium})[tab]();
+  $("#view").innerHTML=({today:vToday,cite:vCite,repas:vRepas,corps:vCorps,otium:vOtium})[tab]();
   const slot=document.getElementById("c3slot");
-  if(tab==="cite"&&slot&&C3.ok){slot.appendChild(C3.wrap);syncC3();start3()}else stop3();
+  if((tab==="cite"||tab==="today")&&slot&&C3.ok){slot.appendChild(C3.wrap);syncC3();start3()}else stop3();
 }
 
 function sportStatus(){
@@ -840,12 +846,25 @@ function evoInfo(){
   const nl=N<8?4:8,nn=N<8?8:10,need=60*(nl-1)*(nl-1),prev=N<8?0:540;
   return {pct:Math.max(0,Math.min(100,(S.xp-prev)/(need-prev)*100)),txt:"Extension "+nn+"×"+nn+" au niveau "+nl+" · encore "+Math.max(0,need-S.xp)+" XP"};
 }
+function hasMeasureThisWeek(){return S.body.some(b=>b.date>=S.weekKey)}
+function vToday(){
+  initC3();
+  const l=lvlOf(S.xp),first=!S.body.length,mOk=hasMeasureThisWeek(),nm=dayMeals(today()).length;
+  const mini='<div class="stage mini'+(C3.ok?'':' fb')+'"><div id="c3slot">'+(C3.ok?'':cityScene())+'</div><button class="mini-hit" data-act="tab" data-a="cite" aria-label="Voir ma forêt en grand"><span>Ma forêt · niveau '+l+'</span><span>Voir ›</span></button></div>';
+  const step=(ok,t,sub,btn)=>'<div class="step'+(ok?' done':'')+'"><div class="tick" aria-hidden="true">'+(ok?'✓':'')+'</div><div class="grow"><b>'+t+'</b><div class="small mute">'+sub+'</div></div>'+(btn||'')+'</div>';
+  const hello=first?'<section class="card flat" style="margin-top:14px;border-color:var(--gold)"><h2 style="font-size:20px">Commence ton cycle</h2><p class="small" style="margin:6px 0 12px">Tout part de ton point de départ : ton poids et tes mensurations. Ensuite chaque geste que tu notes fait grandir ta forêt.</p><button class="btn block" data-act="bodyadd">Saisir mon poids et mes mesures · +10 XP</button></section>':'';
+  const steps='<section class="card" style="margin-top:14px"><div class="cap">À faire</div>'+
+    step(mOk,first?'Poids et mensurations':'Pesée de la semaine',mOk?'Notée cette semaine':'Une fois par semaine, pour suivre ton évolution · +10 XP',mOk?'':'<button class="btn sm" data-act="bodyadd">Saisir</button>')+
+    step(nm>0,'Repas du jour',nm?nm+' noté'+(nm>1?'s':'')+' aujourd\'hui':'Photo, voix ou saisie à la main · +3 XP par repas','<button class="btn sm'+(nm?' ghost':'')+'" data-act="mealvoice">🎤 Dire</button>')+
+    '</section>';
+  return mini+hello+(first?'':steps)+vDefis();
+}
 function vCite(){
   initC3();
   const cs=cityStats(),ev=evoInfo(),N=GN(),c=(N-1)/2,ss=sportStatus(),pr=ss.n>=3?{k:'ok',t:'Forêt protégée'}:ss.tone==='tone-bad'?{k:'bad',t:'Orage lundi'}:{k:'warn',t:'Séances '+ss.n+' sur 3'};
   const free=S.grid.some((b,i)=>!b&&!isRoad(i));
   return '<div class="stage'+(C3.ok?'':' fb')+'"><div id="c3slot">'+(C3.ok?'':cityScene())+'</div><div class="hud">'+
-   '<div class="hud-top"><button class="hchip '+pr.k+'" data-act="tab" data-a="defis">'+pr.t+'</button><span class="hchip gold">'+cs.r+'</span><span class="hchip num">'+cs.pop+' amis</span><span class="hchip num">'+cs.pr+' harmonie</span></div>'+
+   '<div class="hud-top"><button class="hchip '+pr.k+'" data-act="tab" data-a="today">'+pr.t+'</button><span class="hchip gold">'+cs.r+'</span><span class="hchip num">'+cs.pop+' amis</span><span class="hchip num">'+cs.pr+' harmonie</span></div>'+
    '<div class="hud-bot"><div class="row sp"><div><div class="cap">Ta forêt · '+N+'×'+N+'</div><div style="font:700 15px var(--f-d);margin-top:2px">Niveau '+lvlOf(S.xp)+' · '+rank(lvlOf(S.xp))+'</div></div>'+(free?'<button class="btn sm" data-act="amenager">Aménager</button>':'')+'</div>'+
    '<div><div class="bar gold" role="progressbar" aria-label="Prochaine extension" aria-valuenow="'+Math.round(ev.pct)+'" aria-valuemin="0" aria-valuemax="100"><i style="width:'+ev.pct+'%"></i></div><div class="evo">'+ev.txt+'</div></div></div>'+
    '</div></div>';
@@ -1254,7 +1273,7 @@ async function syncPull(){
 }
 async function syncPush(){await pushRemote();closeSheet();render();toast(rs.st==="ok"?"Synchronisation activée":"Serveur injoignable")}
 function sheetWelcome(){
-  openSheet("Bienvenue dans ta clairière",'<div style="display:grid;gap:12px"><p style="margin:0">Une petite île t\'attend. Elle grandit avec toi.</p><p style="margin:0"><b>Va à la salle 3 fois par semaine.</b> Chaque séance te rapporte des glands pour aménager la forêt. Si tu en rates, un orage abîme tes aménagements.</p><p style="margin:0"><b>Valide tes objectifs</b> dans l\'onglet Semaine, note tes repas et tes mesures : tout fait monter ton niveau et agrandit l\'île.</p><button class="btn block" data-act="welcome" data-a="goals">Choisir mes objectifs</button><button class="btn ghost block" data-act="welcome">Découvrir la forêt</button></div>');
+  openSheet("Bienvenue dans ta clairière",'<div style="display:grid;gap:12px"><p style="margin:0">Une petite île t\'attend. Elle grandit avec toi.</p><p style="margin:0"><b>Va à la salle 3 fois par semaine.</b> Chaque séance te rapporte des glands pour aménager la forêt. Si tu en rates, un orage abîme tes aménagements.</p><p style="margin:0"><b>Commence par ton poids et tes mesures</b>, puis valide tes objectifs et note tes repas : chaque geste fait monter ton niveau et agrandit l\'île.</p><button class="btn block" data-act="welcome" data-a="goals">Choisir mes objectifs</button><button class="btn ghost block" data-act="welcome">Commencer</button></div>');
 }
 /* rappel de sauvegarde hebdomadaire */
 function backupDue(){
@@ -1370,7 +1389,7 @@ function act(a,x,y,el){
   case "bodydel":S.body=S.body.filter(b=>b.date!==x);persist();render();break;
   case "export":exportBilan();break;
   case "backup":backupData();break;
-  case "welcome":S.welcomed=1;persist();closeSheet();if(x==="goals"){tab="defis";render();sheetGoal("")}break;
+  case "welcome":S.welcomed=1;persist();closeSheet();if(x==="goals"){tab="today";render();sheetGoal("")}break;
   case "backuplater":S.backupSnooze=today();persist();closeSheet();break;
   case "syncopen":sheetSync();break;
   case "syncsave":{const c=val("sc").trim();if(!c){toast("Entre ton code");return}syncConnect(c);break}
