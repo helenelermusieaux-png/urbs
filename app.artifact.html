@@ -2,11 +2,11 @@
 <title>Clairière</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 /* Layout: une appli mobile en colonne, en-tête collant (niveau, glands, lucioles), contenu par onglet, barre d'onglets en bas. La forêt est une grille de 6x6 tuiles vue du dessus, façon Caesar III. */
 :root{
-  --bg:#EEF4DC; --card:#FFFDF3; --ink:#4A3B2E; --mute:#6E604F; --line:#E2DCC3;
+  --bg:#F4F6F1; --card:#FFFFFF; --ink:#1B2620; --mute:#5E6C63; --line:#E3E8DF;
   --sea:#B9631D; --sea-d:#874510; --on-sea:#FFFFFF;
   --terra:#2E8B4E; --terra-d:#1D6335; --on-terra:#FFFFFF;
   --gold:#F5C14B; --gold-d:#C48F1A; --olive:#58A64F; --olive-d:#3D7A36;
@@ -14,10 +14,10 @@
   --grass:#94D37E; --grass-d:#6DB55C; --road:#EBD3A0; --road-d:#CDB57E;
   --sea-t:#BDEBFA; --sea-b:#8ED3EA;
   --danger:#C23B30; --ok:#2E7D4F; --shade:rgba(74,59,46,.2);
-  --f-d:"Fredoka","Trebuchet MS",system-ui,sans-serif; --f-b:"Nunito",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-d:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif; --f-b:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#13201A; --card:#1C2C24; --ink:#EEF3E2; --mute:#A3B5A3; --line:#2B4036;
+  --bg:#0E1512; --card:#161F1A; --ink:#EAF0EA; --mute:#9AA9A0; --line:#25322B;
   --sea:#F0A458; --sea-d:#B0722F; --on-sea:#2A1606;
   --terra:#6FCF84; --terra-d:#3C8F52; --on-terra:#0C2314;
   --gold:#F7CB5B; --gold-d:#C79A24; --olive:#7BC46F; --olive-d:#4C8A44;
@@ -26,7 +26,7 @@
   --sea-t:#1B3A4B; --sea-b:#12293A;
   --danger:#FF7A6E; --ok:#6FCF84; --shade:rgba(0,0,0,.4); color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#13201A; --card:#1C2C24; --ink:#EEF3E2; --mute:#A3B5A3; --line:#2B4036;
+  --bg:#0E1512; --card:#161F1A; --ink:#EAF0EA; --mute:#9AA9A0; --line:#25322B;
   --sea:#F0A458; --sea-d:#B0722F; --on-sea:#2A1606;
   --terra:#6FCF84; --terra-d:#3C8F52; --on-terra:#0C2314;
   --gold:#F7CB5B; --gold-d:#C79A24; --olive:#7BC46F; --olive-d:#4C8A44;
@@ -250,6 +250,48 @@ th{color:var(--mute);font-size:11px;text-transform:uppercase;letter-spacing:.06e
 #toast{position:fixed;left:50%;top:calc(66px + env(safe-area-inset-top,0px));transform:translate(-50%,-14px);background:var(--ink);color:var(--bg);font-weight:800;padding:11px 18px;border-radius:99px;z-index:70;opacity:0;pointer-events:none;transition:.25s;max-width:calc(100% - 32px);text-align:center;font-size:14px}
 #toast.on{opacity:1;transform:translate(-50%,0)}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ===== passe design moderne : surfaces douces, ombres diffuses, typo Inter ===== */
+:root{--sh1:0 1px 2px rgba(18,32,24,.05),0 12px 28px -16px rgba(18,32,24,.18);--sh2:0 1px 2px rgba(18,32,24,.06)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--sh1:0 1px 2px rgba(0,0,0,.4),0 12px 28px -16px rgba(0,0,0,.6)}}
+:root[data-theme="dark"]{--sh1:0 1px 2px rgba(0,0,0,.4),0 12px 28px -16px rgba(0,0,0,.6)}
+body{font-size:15px;letter-spacing:-.006em;-webkit-font-smoothing:antialiased}
+h1,h2,h3{letter-spacing:-.022em;font-weight:700}
+.hl{font-weight:700;font-size:26px;letter-spacing:-.03em;line-height:1.15}
+.cap{font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--mute)}
+.head{background:color-mix(in srgb,var(--bg) 86%,transparent);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+.lvl{box-shadow:none;background:linear-gradient(160deg,color-mix(in srgb,var(--sea) 82%,#fff),var(--sea));font-weight:700}
+.pill{border:1px solid var(--line);box-shadow:var(--sh2);font-weight:700}
+.card{border:1px solid var(--line);border-radius:22px;padding:18px;box-shadow:var(--sh1);margin-top:12px}
+.card.flat{border-bottom-width:1px}
+.card.okc{border-color:color-mix(in srgb,var(--olive) 55%,var(--line))}
+.btn{font-weight:600;font-size:15px;letter-spacing:-.01em;border-radius:14px;box-shadow:0 1px 2px rgba(15,60,30,.28),inset 0 1px 0 rgba(255,255,255,.2);background:linear-gradient(180deg,color-mix(in srgb,var(--terra) 92%,#fff),var(--terra));transition:transform .12s,box-shadow .12s,filter .12s}
+.btn:active:not(:disabled){transform:scale(.98);box-shadow:0 0 0 rgba(0,0,0,0);filter:brightness(.97)}
+.btn.sea{background:linear-gradient(180deg,color-mix(in srgb,var(--sea) 90%,#fff),var(--sea));box-shadow:0 1px 2px rgba(110,55,10,.3),inset 0 1px 0 rgba(255,255,255,.2)}
+.btn.ghost{background:var(--card);border:1px solid var(--line);box-shadow:var(--sh2);font-weight:600}
+.btn.ghost:active:not(:disabled){box-shadow:none}
+.btn.sm{font-weight:600;border-radius:12px}
+.bar{height:8px}.bar>i{transition:width .5s cubic-bezier(.2,.8,.2,1)}
+.chip{font-weight:600;border-width:1px}
+.empty-note{border:1.5px dashed var(--line);border-radius:18px;background:transparent}
+.kpi{border:1px solid var(--line);border-radius:20px;box-shadow:var(--sh1);padding:14px 6px}
+.kpi b{font-weight:700;letter-spacing:-.03em}
+.kpi span{text-transform:none;font-weight:500}
+.trow{border-top:1px solid var(--line)}.step{border-top:1px solid var(--line)}
+.mtile{border:1px solid var(--line);border-radius:18px;box-shadow:var(--sh2)}
+.item{border-color:var(--line)}
+input,select,textarea{border:1px solid var(--line);border-radius:14px;background:color-mix(in srgb,var(--bg) 60%,var(--card));font-weight:500;transition:border-color .15s,box-shadow .15s}
+input:focus,select:focus,textarea:focus{outline:0;border-color:var(--terra);box-shadow:0 0 0 4px color-mix(in srgb,var(--terra) 16%,transparent)}
+.tabs{background:color-mix(in srgb,var(--card) 80%,transparent);-webkit-backdrop-filter:saturate(1.4) blur(18px);backdrop-filter:saturate(1.4) blur(18px);border-top:1px solid var(--line)}
+.tab{font-weight:600}
+.tab[aria-current="page"]{background:color-mix(in srgb,var(--terra) 13%,transparent);color:var(--terra-d)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .tab[aria-current="page"]{color:var(--terra)}}
+.stage{border:1px solid var(--line);border-radius:26px;box-shadow:var(--sh1)}
+.hchip,.hud-bot,.mini-hit span,.c3btn button{border-width:1px}
+.hud-bot{border-radius:20px}
+.slot{border-width:2px}
+.sheet,#sheet>div{box-shadow:0 -12px 40px -12px rgba(0,0,0,.25)}
+.qb{border-width:1px!important;font-weight:600!important}
 </style>
 
 <div class="app">
