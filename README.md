@@ -1,6 +1,6 @@
 # Clairière
 
-Appli mobile de suivi façon jeu : objectifs hebdo, sport 3x/semaine, repas par photo,
+Appli mobile façon jeu : une forêt 3D qui grandit (6×6, 8×8, 10×10) avec ton niveau, objectifs de la semaine à valider, séances à la salle, repas, mesures avec avatar et loisirs.
 mesures du corps et loisirs font grandir une forêt en 3D (Three.js) peuplée d'animaux.
 
 - `app.artifact.html` : source de l'appli (format Claude Artifact).
