@@ -739,7 +739,8 @@ function vDefis(){
   return '<section class="card flat"><div class="cap">Objectifs de la semaine</div><div class="row sp" style="margin-top:6px"><h2 style="font-size:18px">'+done+' sur '+tot+' atteints</h2><span class="chip" style="--k:var(--gold)">'+(S.perfect===S.weekKey?'Semaine parfaite':'Bonus : +60 gl., 2 lucioles')+'</span></div><div class="bar gold" style="margin-top:10px"><i style="width:'+(done/tot*100)+'%"></i></div></section>'+
    '<div class="card goal"><div class="row sp"><h3>Sport · 3 séances (fixe)</h3><span class="num mute" style="font-weight:800">'+n+'/3</span></div><div class="bar sea"><i style="width:'+Math.min(100,n/3*100)+'%"></i></div><div class="row sp"><button class="x" data-act="sundo"'+(n?'':' disabled')+'>Annuler la dernière</button><button class="btn sm" data-act="sport">Séance faite</button></div></div>'+
    '<div class="cap" style="margin:18px 2px 8px">Complémentaires · hors semaine parfaite</div>'+comp+
-   goals+'<button class="btn ghost block" style="margin-top:14px" data-act="goaledit" data-a="">Nouvel objectif</button>';
+   '<div class="cap" style="margin:18px 2px 8px">Mes objectifs perso · '+S.goals.length+' sur 3 max</div>'+goals+
+   (S.goals.length<3?'<button class="btn ghost block" style="margin-top:14px" data-act="goaledit" data-a="">Ajouter un objectif perso</button>':'<p class="small mute" style="margin:12px 2px 0">3 objectifs perso maximum. Modifie ou supprime-en un pour en changer.</p>');
 }
 
 function dayMeals(d){return S.meals.filter(m=>m.date===d)}
@@ -956,7 +957,7 @@ function act(a,x,y,el){
   case "gminus":{const g=S.goals.find(q=>q.id===x);if(g&&g.d>0){g.d--;persist();render()}break}
   case "goaledit":sheetGoal(x);break;
   case "goalsave":{const t=val("gt").trim(),n=+val("gn");if(!t){toast("Donne un nom à l'objectif");return}
-    if(x){const g=S.goals.find(q=>q.id===x);g.t=t;g.n=n;if(g.d>n)g.d=n;if(g.p>n)g.p=n}else S.goals.push({id:"g"+uid(),t:t,n:n,d:0,p:0});
+    if(x){const g=S.goals.find(q=>q.id===x);g.t=t;g.n=n;if(g.d>n)g.d=n;if(g.p>n)g.p=n}else if(S.goals.length>=3){toast("3 objectifs perso maximum");return}else S.goals.push({id:"g"+uid(),t:t,n:n,d:0,p:0});
     persist();closeSheet();render();break}
   case "goaldel":S.goals=S.goals.filter(q=>q.id!==x);persist();closeSheet();render();break;
   case "mealmanual":sheetMealForm();break;
