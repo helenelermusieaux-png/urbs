@@ -883,7 +883,7 @@ function vRepas(){
    '<div class="macros num"><div><b>'+Math.round(t.p)+'</b><span>Protéines g</span></div><div><b>'+Math.round(t.g)+'</b><span>Glucides g</span></div><div><b>'+Math.round(t.l)+'</b><span>Lipides g</span></div><div><b>'+Math.round(t.f)+'</b><span>Fibres g</span></div></div></section>'+
    '<div class="row" style="margin-top:14px;flex-wrap:wrap;align-items:stretch">'+
    (photo?'<label class="btn" for="photo" style="flex:1">Prendre une photo</label><input id="photo" type="file" accept="image/*" capture="environment" hidden><label class="btn sea" for="photo2" style="flex:1">Depuis la galerie</label><input id="photo2" type="file" accept="image/*" hidden>':'<button class="btn" style="flex:1" data-act="mkey">Activer l\'analyse photo</button>')+
-   '<button class="btn ghost" style="flex:1 1 100%" data-act="mealmanual">Ajouter à la main</button></div>'+
+   '<button class="btn" style="flex:1 1 100%" data-act="mealvoice">🎤 Dire mon repas</button><button class="btn ghost" style="flex:1 1 100%" data-act="mealmanual">Ajouter à la main</button></div>'+
    (eng==="mistral"?'<p class="disc">Analyse par Mistral (gratuit). <button class="x" data-act="mkey">Clé API</button></p>':!photo?'<p class="disc">Analyse gratuite par photo avec Mistral : une clé API gratuite suffit.</p>':'')+
    '<section class="card"><div class="cap">Repas du jour</div>'+(td.length?td.map(mealItem).join(""):'<div class="empty-note">Pas encore de repas aujourd\'hui. Prends ton assiette en photo : j\'estime les calories et les macros.</div>')+'</section>'+
    (days.length?'<section class="card"><div class="cap">Jours précédents</div>'+days.map(d=>'<div class="item"><div class="grow"><b>'+fmt(d[0],{weekday:"long",day:"numeric",month:"short"})+'</b><div class="small mute">'+d[1]+' repas</div></div><b class="num">'+Math.round(d[2])+' kcal</b></div>').join("")+'</section>':'')+
@@ -1078,7 +1078,7 @@ async function mistralJSON(prompt,dataUrl,signal){
   const key=getKey();let last;
   for(const model of ["mistral-small-latest","pixtral-12b-latest"]){
     let r;
-    try{r=await fetch("https://api.mistral.ai/v1/chat/completions",{method:"POST",signal,headers:{"Content-Type":"application/json","Authorization":"Bearer "+key},body:JSON.stringify({model,temperature:.2,response_format:{type:"json_object"},messages:[{role:"user",content:[{type:"text",text:prompt},{type:"image_url",image_url:dataUrl}]}]})})}
+    try{r=await fetch("https://api.mistral.ai/v1/chat/completions",{method:"POST",signal,headers:{"Content-Type":"application/json","Authorization":"Bearer "+key},body:JSON.stringify({model,temperature:.2,response_format:{type:"json_object"},messages:[{role:"user",content:dataUrl?[{type:"text",text:prompt},{type:"image_url",image_url:dataUrl}]:prompt}]})})}
     catch(e){if(e&&e.name==="AbortError")throw {code:"cancelled"};throw {code:"network"}}
     if(!r.ok){
       let det="";try{const j=await r.json();det=String(j.message||(j.error&&j.error.message)||j.detail||JSON.stringify(j)).slice(0,160)}catch(_){}
@@ -1114,6 +1114,39 @@ async function analyseMeal(file){
     const m={nom:r.nom||"Repas",kcal:num(r.kcal)||0,p:num(r.proteines_g)||0,g:num(r.glucides_g)||0,l:num(r.lipides_g)||0,f:num(r.fibres_g)||0};
     const li=(r.aliments||[]).slice(0,6).map(a=>'<li>'+esc(a.nom)+' · '+Math.round(num(a.g)||0)+' g · '+Math.round(num(a.kcal)||0)+' kcal</li>').join("");
     sheetMealForm(m,'<img src="'+img.url+'" alt="Ton repas" style="width:100%;max-height:200px;object-fit:cover;border-radius:14px;margin-bottom:10px"><div class="small" style="margin-bottom:12px"><span class="chip">Confiance '+esc(r.confiance||"moyenne")+'</span> '+esc(r.portion||"")+(li?'<ul style="margin:8px 0 0;padding-left:18px">'+li+'</ul>':'')+(r.remarque?'<div class="mute" style="margin-top:6px">'+esc(r.remarque)+'</div>':'')+''+macroBar(m)+advice(r)+'<div class="mute" style="margin-top:6px">Corrige les chiffres si besoin avant d\'ajouter.</div></div>');
+  }catch(e){
+    if(e&&e.code==="cancelled")return;
+    sheetMealForm(null,'<p class="small tone-bad" style="font-weight:700">'+((e&&MERR[e.code])||copyFor(e&&e.code))+(e&&e.status?' <span class="mute">(Mistral '+e.status+(e.detail?' : '+esc(e.detail):'')+')</span>':'')+' Tu peux saisir le repas à la main.</p>');
+  }
+}
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;let rec=null,recOn=false;
+function sheetVoice(){
+  openSheet("Dire mon repas",'<div class="form"><p class="small mute" style="margin:0">Appuie sur le micro et dis ce que tu as mangé, avec les quantités si tu les connais. Ex. : « deux œufs brouillés, une tranche de pain complet et un café ». Tu peux corriger le texte avant de lancer.</p>'+(SR?'<button class="btn sea block" id="vmic" data-act="voicego">🎤 Parler</button>':'<p class="small mute" style="margin:0">Dictée non disponible ici : utilise le micro du clavier de ton téléphone.</p>')+'<label class="f">Ce que j\'ai mangé<textarea id="v_txt" rows="4" maxlength="500" placeholder="Ex. un bol de skyr, une banane et des amandes"></textarea></label><button class="btn block" data-act="voiceok">Estimer les calories et les macros</button></div>');
+}
+function voiceToggle(){
+  const b=document.getElementById("vmic"),t=document.getElementById("v_txt");if(!SR||!t)return;
+  if(recOn&&rec){try{rec.stop()}catch(e){}return}
+  rec=new SR();rec.lang="fr-FR";rec.interimResults=true;rec.continuous=false;
+  const base=t.value?t.value.trim()+" ":"";
+  rec.onstart=()=>{recOn=true;if(b)b.textContent="⏹ J'écoute… (toucher pour arrêter)"};
+  rec.onresult=ev=>{let x="";for(let i=0;i<ev.results.length;i++)x+=ev.results[i][0].transcript;t.value=base+x};
+  rec.onerror=ev=>{recOn=false;if(b)b.textContent="🎤 Parler";if(ev&&(ev.error==="not-allowed"||ev.error==="service-not-allowed"))toast("Micro refusé : autorise-le dans les réglages du navigateur.")};
+  rec.onend=()=>{recOn=false;const bb=document.getElementById("vmic");if(bb)bb.textContent="🎤 Parler"};
+  try{rec.start()}catch(e){recOn=false}
+}
+async function analyseText(){
+  const t=document.getElementById("v_txt"),txt=t?t.value.trim():"";
+  if(!txt){toast("Dis ou écris d'abord ton repas.");return}
+  if(recOn&&rec){try{rec.stop()}catch(e){}}
+  ctl=new AbortController();
+  openSheet("Analyse du repas",'<div class="row"><div class="spin"></div><span class="small mute">J\'estime ton repas…</span></div><button class="btn ghost block" style="margin-top:14px" data-act="close">Annuler</button>');
+  const prompt="Tu es diététicien. Voici la description d'un repas faite à l'oral : « "+txt.replace(/[«»]/g,"")+" ». Estime son contenu nutritionnel en supposant des portions habituelles quand elles ne sont pas précisées. Réponds uniquement par un objet JSON de cette forme : {\"nom\":\"nom court du repas en français\",\"portion\":\"description courte\",\"kcal\":650,\"proteines_g\":30,\"glucides_g\":70,\"lipides_g\":25,\"fibres_g\":8,\"aliments\":[{\"nom\":\"riz\",\"g\":180,\"kcal\":230}],\"confiance\":\"faible|moyenne|bonne\",\"remarque\":\"une phrase\",\"conseils\":[\"2 à 3 propositions courtes et bienveillantes pour équilibrer ce repas ou le prochain\"]}. Maximum 6 aliments. Si ce n'est pas un repas, mets kcal à 0 et explique dans remarque.";
+  try{
+    const r=engine()==='claude'?await caps.sample.json(prompt,{cache:false,signal:ctl.signal}):await mistralJSON(prompt,null,ctl.signal);
+    ctl=null;
+    const m={nom:r.nom||txt.slice(0,60),kcal:num(r.kcal)||0,p:num(r.proteines_g)||0,g:num(r.glucides_g)||0,l:num(r.lipides_g)||0,f:num(r.fibres_g)||0};
+    const li=(r.aliments||[]).slice(0,6).map(a=>'<li>'+esc(a.nom)+' · '+Math.round(num(a.g)||0)+' g · '+Math.round(num(a.kcal)||0)+' kcal</li>').join("");
+    sheetMealForm(m,'<div class="small" style="margin-bottom:12px"><div class="mute" style="margin-bottom:6px">« '+esc(txt)+' »</div><span class="chip">Confiance '+esc(r.confiance||"moyenne")+'</span> '+esc(r.portion||"")+(li?'<ul style="margin:8px 0 0;padding-left:18px">'+li+'</ul>':'')+(r.remarque?'<div class="mute" style="margin-top:6px">'+esc(r.remarque)+'</div>':'')+macroBar(m)+advice(r)+'<div class="mute" style="margin-top:6px">Corrige les chiffres si besoin avant d\'ajouter.</div></div>');
   }catch(e){
     if(e&&e.code==="cancelled")return;
     sheetMealForm(null,'<p class="small tone-bad" style="font-weight:700">'+((e&&MERR[e.code])||copyFor(e&&e.code))+(e&&e.status?' <span class="mute">(Mistral '+e.status+(e.detail?' : '+esc(e.detail):'')+')</span>':'')+' Tu peux saisir le repas à la main.</p>');
@@ -1271,6 +1304,9 @@ function act(a,x,y,el){
     persist();closeSheet();render();break}
   case "goaldel":S.goals=S.goals.filter(q=>q.id!==x);persist();closeSheet();render();break;
   case "mealmanual":sheetMealForm();break;
+  case "mealvoice":if(!engine())sheetMistral();else sheetVoice();break;
+  case "voicego":voiceToggle();break;
+  case "voiceok":analyseText();break;
   case "mealsave":{const nom=val("m_nom").trim()||"Repas";const k=num(val("m_kcal"));if(k==null){toast("Indique les calories");return}
     S.meals.push({id:uid(),date:today(),time:nowHM(),type:val("m_type"),nom:nom,kcal:k,p:num(val("m_p"))||0,g:num(val("m_g"))||0,l:num(val("m_l"))||0,f:num(val("m_f"))||0});
     gain(3,2);persist();closeSheet();render();break}
