@@ -147,7 +147,7 @@ svg .wts{stroke:var(--water);fill:none;stroke-width:2.2;stroke-linecap:round}
 .wd.now{color:var(--ink)}
 .wd.past:not(.on) i{opacity:.5}
 .tab{position:relative}
-.tab .dot{position:absolute;top:5px;left:calc(50% + 8px);width:10px;height:10px;border-radius:50%;background:var(--danger);border:2px solid var(--card)}
+.tab .dot{position:absolute;top:5px;left:calc(50% + 8px);width:10px;height:10px;border-radius:50%;background:var(--gold);border:2px solid var(--card)}
 .hchip.ok{background:color-mix(in srgb,var(--olive) 30%,var(--card));border-color:color-mix(in srgb,var(--olive) 65%,var(--card))}
 .hchip.warn{background:color-mix(in srgb,var(--gold) 32%,var(--card));border-color:color-mix(in srgb,var(--gold) 65%,var(--card))}
 .hchip.bad{background:color-mix(in srgb,var(--danger) 25%,var(--card));border-color:color-mix(in srgb,var(--danger) 60%,var(--card))}
@@ -218,8 +218,8 @@ th{color:var(--mute);font-size:11px;text-transform:uppercase;letter-spacing:.06e
 
 /* barre d'onglets */
 .tabs{position:fixed;left:0;right:0;bottom:0;z-index:40;background:var(--card);border-top:2px solid var(--line);padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px))}
-.tabs div{max-width:520px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr);gap:4px}
-.tab{background:none;border:0;border-radius:14px;padding:6px 2px;display:grid;justify-items:center;gap:2px;font:700 11px var(--f-b);color:var(--mute);cursor:pointer;min-height:52px}
+.tabs div{max-width:520px;margin:0 auto;display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:2px}
+.tab{background:none;border:0;border-radius:14px;padding:6px 0;display:grid;justify-items:center;gap:2px;font:700 10.5px var(--f-b);white-space:nowrap;letter-spacing:-.1px;color:var(--mute);cursor:pointer;min-height:52px}
 .tab svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .tab[aria-current="page"]{color:var(--terra);background:color-mix(in srgb,var(--terra) 12%,var(--card))}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .tab[aria-current="page"]{color:var(--terra)}}
@@ -701,7 +701,7 @@ function fresh(){
   grid[13]={t:"terrier",l:1,x:0};grid[25]={t:"chene",l:1,x:0};
   return {v:1,n:6,xp:0,den:30,reels:1,weekKey:monday(),streak:0,perfect:"",sport:[],sportP:0,comp:[{id:"c1",t:"Mouvement Petit Bambou",n:3,d:0,p:0},{id:"c2",t:"MindDay",n:5,d:0,p:0}],
     goals:[],
-    grid,log:[],pending:[],body:[],meals:[],cravings:[],leisure:[],eps:{},upd:0};
+    grid,log:[],pending:[],body:[],meals:[],cravings:[],opts:{bilans:false},bilans:[],leisure:[],eps:{},upd:0};
 }
 function loadLocal(){try{const r=localStorage.getItem(KEY);return r?JSON.parse(r):null}catch(e){return null}}
 let saveTimer=null,saving=false,again=false;
@@ -805,10 +805,11 @@ const ICON={
  laurel:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg>'
 };
 const TABS=[
- ["today","Aujourd'hui",'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><path d="M12 12l7-7"/>'],
+ ["today","Jour",'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><path d="M12 12l7-7"/>'],
  ["cite","Forêt",'<path d="M3 21h18M5 21V10l7-5 7 5v11M9 21v-6h6v6"/>'],
  ["repas","Repas",'<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>'],
  ["corps","Corps",'<rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 9a4 4 0 0 1 8 0M12 9l2.5-2.5"/>'],
+ ["energie","Énergie",'<path d="M13 2L5 14h6l-1 8 8-12h-6z"/>'],
  ["otium","Loisirs",'<path d="M5 4h10a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3zM5 17a3 3 0 0 1 3-3h10"/>']
 ];
 let tab="today",lfilter="all";
@@ -821,11 +822,11 @@ function renderHead(){
 }
 function renderTabs(){
   const todo=S.sport.length<3||S.goals.some(g=>!g.s);
-  $("#tabs").innerHTML=TABS.map(t=>'<button class="tab" data-act="tab" data-a="'+t[0]+'"'+(tab===t[0]?' aria-current="page"':'')+'><svg viewBox="0 0 24 24" aria-hidden="true">'+t[2]+'</svg>'+t[1]+(t[0]==="today"&&todo&&tab!=="today"?'<span class="dot" aria-label="À faire"></span>':'')+'</button>').join("");
+  $("#tabs").innerHTML=TABS.filter(t=>t[0]!=="energie"||optOn()).map(t=>'<button class="tab" data-act="tab" data-a="'+t[0]+'"'+(tab===t[0]?' aria-current="page"':'')+'><svg viewBox="0 0 24 24" aria-hidden="true">'+t[2]+'</svg>'+t[1]+((t[0]==="today"&&todo&&tab!=="today")||(t[0]==="energie"&&energyDue()&&tab!=="energie")?'<span class="dot" aria-label="À faire"></span>':'')+'</button>').join("");
 }
 function render(){
   renderHead();renderTabs();
-  $("#view").innerHTML=({today:vToday,cite:vCite,repas:vRepas,corps:vCorps,otium:vOtium})[tab]();
+  $("#view").innerHTML=({today:vToday,cite:vCite,repas:vRepas,corps:vCorps,energie:vEnergie,otium:vOtium})[(tab==="energie"&&!optOn())?"today":tab]();
   const slot=document.getElementById("c3slot");
   if((tab==="cite"||tab==="today")&&slot&&C3.ok){slot.appendChild(C3.wrap);syncC3();start3()}else stop3();
 }
@@ -846,6 +847,55 @@ function evoInfo(){
   const nl=N<8?4:8,nn=N<8?8:10,need=60*(nl-1)*(nl-1),prev=N<8?0:540;
   return {pct:Math.max(0,Math.min(100,(S.xp-prev)/(need-prev)*100)),txt:"Extension "+nn+"×"+nn+" au niveau "+nl+" · encore "+Math.max(0,need-S.xp)+" XP"};
 }
+const optOn=()=>!!(S.opts&&S.opts.bilans);
+const QS={
+ fat:{id:"fat",titre:"Échelle de fatigue (Pichot)",min:0,max:32,lo:0,hi:4,labels:["Pas du tout","Un peu","Moyen","Beaucoup","Extrême"],better:"low",
+  intro:"Pour chaque phrase, indique à quel point elle te correspond en ce moment.",
+  items:["Je manque d'énergie.","Le moindre effort me demande beaucoup.","Je ressens de la faiblesse dans certaines parties du corps.","J'ai les bras ou les jambes lourds.","Je me sens fatiguée sans raison.","J'ai envie de m'allonger pour me reposer.","J'ai du mal à me concentrer.","Je me sens fatiguée, lourde et raide."],
+  interp:n=>n>22?{t:"Fatigue excessive (au-dessus de 22)",k:"bad"}:{t:"Sous le seuil de 22",k:"ok"}},
+ vie:{id:"vie",titre:"Hygiène de vie et énergie",min:20,max:100,lo:1,hi:5,labels:["Jamais","Rarement","Parfois","Souvent","Toujours"],better:"high",
+  intro:"Pour chaque phrase, indique à quelle fréquence elle correspond à ta vie actuelle. Le total est sur 100.",
+  items:["Mon alimentation est plutôt anti-inflammatoire.","Je prends soin de ma digestion (bien mâcher, repas calmes, pré et probiotiques).","Mes repas sont réguliers : pas de repas sautés, pas de grignotage sans faim.","Je mange au calme, sans écran, en prenant mon temps.","J'adapte mon alimentation à mon activité et à mes besoins.","Je m'expose à la lumière du jour dans l'heure après le réveil.","Je comble mes carences éventuelles par une complémentation ciblée.","J'évite les écrans et la lumière bleue 1 h avant de dormir.","Je dors 7 à 9 h par nuit et je me sens reposée.","Le soir, j'ai une routine de détente (lecture, respiration, étirements).","Je bouge chaque jour, même hors séance de sport.","Je fais une activité physique modérée ou intense plusieurs fois par semaine.","Je m'accorde de la récupération après l'effort.","Je gère mon stress au quotidien (respiration, pauses, bienveillance envers moi).","Je fais attention à la qualité de mon environnement (air, eau, produits utilisés).","Je limite les perturbateurs endocriniens (cosmétiques, plastiques).","Je limite ma charge mentale (organisation, déléguer, prioriser).","Je passe du temps dans la nature.","Je pratique des activités qui me ressourcent (balade, art, méditation).","Je prends soin de mes relations et j'évite l'entourage toxique."],
+  interp:n=>n<40?{t:"À réajuster",k:"bad"}:n<60?{t:"Des signaux d'alerte",k:"warn"}:n<80?{t:"Sur la bonne voie",k:"ok"}:{t:"Très équilibrée",k:"ok"}}
+};
+const bilKind=k=>S.bilans.filter(b=>b.kind===k).sort((a,b)=>a.date.localeCompare(b.date));
+function bilNext(k){const l=bilKind(k).pop();return l?addDays(l.date,91):null}
+function energyDue(){if(!optOn())return false;return ["fat","vie"].some(k=>{const n=bilNext(k);return !n||today()>=n})}
+function qChart(k){
+  const q=QS[k],pts=bilKind(k).slice(-8);if(!pts.length)return "";
+  const W=300,H=64,x=i=>pts.length===1?W/2:10+i*(W-20)/(pts.length-1),y=v=>H-8-(v-q.min)/(q.max-q.min)*(H-16);
+  const col=q.better==="low"?"var(--terra)":"var(--olive,#2E8C50)";
+  return '<svg viewBox="0 0 '+W+' '+H+'" width="100%" height="64" role="img" aria-label="Évolution des scores" style="margin-top:8px"><polyline fill="none" stroke="'+col+'" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" points="'+pts.map((b,i)=>x(i)+','+y(b.score)).join(' ')+'"/>'+pts.map((b,i)=>'<circle cx="'+x(i)+'" cy="'+y(b.score)+'" r="4.5" fill="'+col+'"/>').join("")+'</svg>';
+}
+function vEnergie(){
+  const card=k=>{
+    const q=QS[k],h=bilKind(k),l=h[h.length-1],pv=h[h.length-2],nx=bilNext(k),due=!nx||today()>=nx;
+    let dl="";if(l&&pv){const d=l.score-pv.score,good=q.better==="low"?d<0:d>0;dl='<span class="small '+(d===0?'mute':good?'tone-ok':'tone-warn')+'" style="font-weight:700">'+(d>0?"+":"")+d+' depuis le dernier bilan</span>'}
+    const it=l?q.interp(l.score):null;
+    const hist=h.slice().reverse().slice(0,6).map(b=>'<div class="item"><div class="grow"><b>'+fmt(b.date,{day:"numeric",month:"long",year:"numeric"})+'</b><div class="small mute">'+esc(q.interp(b.score).t)+'</div></div><b class="num">'+b.score+' / '+q.max+'</b><button class="x" data-act="qdel" data-a="'+b.id+'">Retirer</button></div>').join("");
+    return '<section class="card"><div class="cap">'+esc(q.titre)+'</div>'+
+     (l?'<div class="row sp" style="margin-top:6px;align-items:flex-end"><h2 class="num" style="font-size:30px">'+l.score+' <span class="small mute" style="font-family:var(--f-b);font-weight:700">sur '+q.max+'</span></h2><span class="chip">'+esc(it.t)+'</span></div>'+(dl?'<div style="margin-top:2px">'+dl+'</div>':''):'<div class="empty-note">Pas encore de bilan. Fais-le une première fois pour avoir ton point de départ.</div>')+
+     qChart(k)+
+     '<p class="small '+(due?'tone-warn':'mute')+'" style="margin:8px 0 10px;font-weight:700">'+(due?(l?'Un nouveau bilan est conseillé.':'À faire maintenant.'):'Prochain bilan conseillé le '+fmt(nx,{day:"numeric",month:"long"})+'.')+'</p>'+
+     '<button class="btn'+(due?'':' ghost')+' block" data-act="qstart" data-a="'+k+'">'+(l?'Refaire le bilan':'Faire le bilan')+'</button>'+
+     (hist?'<div style="margin-top:12px">'+hist+'</div>':'')+'</section>';
+  };
+  return '<section class="card flat"><h2 style="font-size:20px">Bilans énergie</h2><p class="small mute" style="margin:6px 0 0">Deux questionnaires inspirés du livre « Mon programme antifatigue » (Yohan Mannone), à refaire tous les 3 mois pour suivre ton évolution. Ce sont des auto-évaluations, pas un diagnostic : en cas de doute, parles-en à un professionnel de santé. Ils sont ajoutés au bilan exporté.</p></section>'+card("fat")+card("vie")+
+   '<p class="disc">Tu peux masquer cet onglet à tout moment dans Corps, rubrique Modules.</p>';
+}
+function sheetQ(k){
+  const q=QS[k];window.__q={k,ans:Array(q.items.length).fill(null)};
+  const leg=q.labels.map((l,i)=>(q.lo+i)+' = '+l).join(' · ');
+  const rows=q.items.map((t,i)=>'<div class="qrow" style="padding:10px 0;border-top:2px solid var(--line)"><div style="font-weight:700;font-size:15px;margin-bottom:8px">'+(i+1)+'. '+esc(t)+'</div><div style="display:flex;gap:6px">'+q.labels.map((l,j)=>'<button type="button" class="qb" data-act="qa" data-a="'+i+'" data-b="'+(q.lo+j)+'" aria-label="'+esc(l)+'" style="flex:1;min-height:42px;border:2px solid var(--line);border-radius:12px;background:var(--bg);font:800 16px var(--f-b);color:var(--ink)">'+(q.lo+j)+'</button>').join("")+'</div></div>').join("");
+  openSheet(q.titre,'<p class="small mute" style="margin:0 0 6px">'+esc(q.intro)+'</p><p class="small" style="margin:0 0 6px;font-weight:700">'+leg+'</p>'+rows+'<div style="position:sticky;bottom:0;background:var(--card);padding:10px 0 2px"><div class="small mute num" id="qcount" style="text-align:center;margin-bottom:6px"></div><button class="btn block" data-act="qsave" id="qsv">Enregistrer le bilan</button></div>');
+  qPaint();
+}
+function qPaint(){
+  const Q=window.__q,q=QS[Q.k];
+  document.querySelectorAll(".qrow").forEach((r,i)=>r.querySelectorAll(".qb").forEach(b=>{const on=Q.ans[i]===+b.dataset.b;b.style.background=on?"var(--olive,#2E8C50)":"var(--bg)";b.style.color=on?"#fff":"var(--ink)";b.style.borderColor=on?"transparent":"var(--line)"}));
+  const n=Q.ans.filter(a=>a!=null).length,tot=Q.ans.reduce((a,b)=>a+(b||0),0),c=document.getElementById("qcount");
+  if(c)c.textContent=n+" réponse"+(n>1?"s":"")+" sur "+q.items.length+(n===q.items.length?" · total "+tot+" sur "+q.max:"");
+}
 function hasMeasureThisWeek(){return S.body.some(b=>b.date>=S.weekKey)}
 function vToday(){
   initC3();
@@ -856,7 +906,7 @@ function vToday(){
   const steps='<section class="card" style="margin-top:14px"><div class="cap">À faire</div>'+
     step(mOk,first?'Poids et mensurations':'Pesée de la semaine',mOk?'Notée cette semaine':'Une fois par semaine, pour suivre ton évolution · +10 XP',mOk?'':'<button class="btn sm" data-act="bodyadd">Saisir</button>')+
     step(nm>0,'Repas du jour',nm?nm+' noté'+(nm>1?'s':'')+' aujourd\'hui':'Photo, voix ou saisie à la main · +3 XP par repas','<button class="btn sm'+(nm?' ghost':'')+'" data-act="mealvoice">🎤 Dire</button>')+
-    '</section>';
+    (energyDue()?step(false,'Bilan énergie','Questionnaire du livre, tous les 3 mois · +10 XP','<button class="btn sm" data-act="tab" data-a="energie">Faire</button>'):'')+'</section>';
   return mini+hello+(first?'':steps)+vDefis();
 }
 function vCite(){
@@ -937,7 +987,7 @@ async function cravAI(){
   }catch(e){if(info)info.innerHTML='<p class="small tone-bad" style="font-weight:700;margin:0">'+((e&&MERR[e.code])||"Analyse impossible.")+' Tu peux remplir à la main.</p>'}
 }
 function mealItem(m){
-  return '<div class="item"><div class="grow"><b>'+esc(m.nom)+'</b><div class="small mute">'+esc(m.time)+' · '+esc(m.type)+' · P '+Math.round(m.p||0)+' · G '+Math.round(m.g||0)+' · L '+Math.round(m.l||0)+'</div></div><div style="text-align:right"><b class="num">'+Math.round(m.kcal||0)+'</b><div class="small mute">kcal</div><button class="x" data-act="mealdel" data-a="'+m.id+'">Retirer</button></div></div>';
+  return '<div class="item"><div class="grow"><b>'+esc(m.nom)+'</b><div class="small mute">'+esc(m.time)+' · '+esc(m.type)+' · Prot. '+Math.round(m.p||0)+' g · Gluc. '+Math.round(m.g||0)+' g · Lip. '+Math.round(m.l||0)+' g'+'</div></div><div style="text-align:right"><b class="num">'+Math.round(m.kcal||0)+'</b><div class="small mute">kcal</div><button class="x" data-act="mealdel" data-a="'+m.id+'">Retirer</button></div></div>';
 }
 
 const MET=[["poids","Poids","kg",1],["ventre","Tour de taille","cm",1],["hanches","Hanches","cm",1],["poitrine","Poitrine","cm",0],["bras","Bras","cm",0],["cuisse","Cuisse","cm",0]];
@@ -1014,9 +1064,10 @@ function vCorps(){
   const av='<section class="card"><div class="cap">Ton avatar</div>'+avatarSVG()+'<p class="small mute" style="margin:8px 0 0;text-align:center">'+(S.body.length>1?'Les pointillés montrent tes premières mesures.':'Il prend la forme de tes mesures. Ajoute-les pour le façonner.')+'</p></section>';
   return av+'<section class="card flat"><div class="row sp"><div><div class="cap">Évolution du poids</div><div class="small mute" style="margin-top:2px">'+(th?'Taille '+fn(th)+' cm':'Taille non renseignée')+(i?' · IMC '+fn(i):'')+'</div></div><button class="btn" data-act="bodyadd">Nouvelle mesure</button></div><div style="margin-top:12px">'+spark()+'</div></section>'+
    '<div class="tiles" style="margin-top:14px">'+tiles+'</div>'+
-   (S.body.length?'<section class="card"><div class="cap">Historique</div><div class="scroll" style="margin-top:8px"><table><thead><tr><th>Date</th><th>Poids</th><th>Taille</th><th>Hanch.</th><th>Poitr.</th><th>Bras</th><th>Cuisse</th><th></th></tr></thead><tbody>'+rows+'</tbody></table></div></section>':'')+
+   (S.body.length?'<section class="card"><div class="cap">Historique</div><div class="scroll" style="margin-top:8px"><table><thead><tr><th>Date</th><th>Poids</th><th>Tour taille</th><th>Hanch.</th><th>Poitr.</th><th>Bras</th><th>Cuisse</th><th></th></tr></thead><tbody>'+rows+'</tbody></table></div></section>':'')+
    (caps.dl&&(S.body.length||S.meals.length)?'<button class="btn sea block" style="margin-top:14px" data-act="export">Exporter le bilan pour un professionnel de santé</button>':'')+
-   '<section class="card"><div class="cap">Sauvegarde de l\'appli</div><p class="small mute" style="margin:6px 0 12px">Tes données sont gardées sur ce téléphone. Une sauvegarde est proposée chaque semaine. '+(S.lastBackup?'Dernière : '+fmt(S.lastBackup)+'.':'Aucune pour l\'instant.')+'</p><div class="row" style="flex-wrap:wrap;align-items:stretch"><button class="btn ghost" style="flex:1" data-act="backup">Sauvegarder</button><label class="btn ghost" for="restore" style="flex:1">Restaurer</label><input id="restore" type="file" accept="application/json,.json" hidden></div><div class="row sp" style="margin-top:12px;align-items:flex-start"><div id="syncnote" class="small mute" style="flex:1">'+syncText()+'</div><button class="btn sea sm" data-act="syncopen">'+(syncCode()?'Régler':'Synchroniser')+'</button></div></section>';
+   '<section class="card"><div class="cap">Modules</div><div class="row sp" style="margin-top:8px;gap:12px"><div class="grow"><b>Bilans énergie</b><div class="small mute">Questionnaires du livre « Mon programme antifatigue », à refaire tous les 3 mois. Tu peux les masquer : tes résultats sont conservés.</div></div><button class="btn sm'+(optOn()?'':' ghost')+'" data-act="optbil" aria-pressed="'+optOn()+'">'+(optOn()?'Activé':'Activer')+'</button></div></section>'+
+   '<section class="card"><div class="cap">Sauvegarde de l\'appli</div><p class="small mute" style="margin:6px 0 12px">Tes données sont gardées sur ce téléphone. Une sauvegarde est proposée chaque semaine. '+(S.lastBackup?'Dernière : '+fmt(S.lastBackup,{day:"numeric",month:"long"})+'.':'Aucune pour l\'instant.')+'</p><div class="row" style="flex-wrap:wrap;align-items:stretch"><button class="btn ghost" style="flex:1" data-act="backup">Sauvegarder</button><label class="btn ghost" for="restore" style="flex:1">Restaurer</label><input id="restore" type="file" accept="application/json,.json" hidden></div><div class="row sp" style="margin-top:12px;align-items:flex-start"><div id="syncnote" class="small mute" style="flex:1">'+syncText()+'</div><button class="btn sea sm" data-act="syncopen">'+(syncCode()?'Régler':'Synchroniser')+'</button></div></section>';
 }
 
 function stars(n){let s="";for(let i=1;i<=5;i++)s+=i<=n?"★":"☆";return s}
@@ -1325,6 +1376,8 @@ function exportBilan(){
   rows.push([],["Émotions associées (total)"],["Émotion","Fois"]);all.emo.forEach(e=>rows.push([e[0],e[1]]));
   rows.push([],["JOURNAL DES CRAQUAGES"],["Date","Heure","Ce qui a été mangé","kcal estimées","Émotions","Déclencheur noté"]);
   S.cravings.slice().sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time)).forEach(c=>rows.push([c.date,c.time,c.nom,Math.round(c.kcal||0),(c.emo||[]).join(", "),c.trig||""]));
+  if(S.bilans&&S.bilans.length){rows.push([],["BILANS ÉNERGIE (questionnaires auto-évalués, tous les 3 mois)"],["Date","Questionnaire","Score","Sur","Lecture"]);
+    S.bilans.slice().sort((a,b)=>a.date.localeCompare(b.date)).forEach(b=>{const q=QS[b.kind];if(q)rows.push([b.date,q.titre,b.score,q.max,q.interp(b.score).t])})}
   dlSave("bilan-sante-"+today()+".csv",csv(rows)).then(()=>toast("Bilan enregistré")).catch(e=>{if(!e||e.code!=="declined")toast("Export impossible ici")});
 }
 
@@ -1366,6 +1419,13 @@ function act(a,x,y,el){
     persist();closeSheet();render();break}
   case "goaldel":S.goals=S.goals.filter(q=>q.id!==x);persist();closeSheet();render();break;
   case "mealmanual":sheetMealForm();break;
+  case "optbil":{S.opts=S.opts||{};S.opts.bilans=!S.opts.bilans;if(!S.opts.bilans&&tab==="energie")tab="today";persist();render();toast(S.opts.bilans?"Onglet Énergie activé":"Onglet Énergie masqué");break}
+  case "qstart":sheetQ(x);break;
+  case "qa":{const i=+x,v=+y;window.__q.ans[i]=v;qPaint();break}
+  case "qsave":{const q=QS[window.__q.k];if(window.__q.ans.filter(a=>a!=null).length<q.items.length){toast("Réponds à toutes les questions");return}
+    const sc=window.__q.ans.reduce((a,b)=>a+b,0);S.bilans.push({id:uid(),date:today(),kind:q.id,score:sc,ans:window.__q.ans.slice()});
+    gain(10,5,0,"Bilan fait.");persist();closeSheet();render();break}
+  case "qdel":S.bilans=S.bilans.filter(b=>b.id!==x);persist();render();break;
   case "cravnew":sheetCrav();break;
   case "emo":{const i=window.__emo.indexOf(x);if(i>=0)window.__emo.splice(i,1);else window.__emo.push(x);emoPaint();break}
   case "cravai":cravAI();break;
