@@ -999,16 +999,19 @@ async function genEp(id,n){
 const MKEY="urbs-mistral";
 const getKey=()=>{try{return localStorage.getItem(MKEY)||""}catch(e){return ""}};
 const engine=()=>caps.sample&&caps.img?"claude":getKey()?"mistral":"";
-const MERR={auth:"Clé Mistral refusée. Vérifie-la dans les réglages.",rate:"Limite gratuite atteinte. Réessaie dans une minute.",network:"Impossible de joindre Mistral depuis ici.",parse:"Réponse illisible, réessaie.",http:"Mistral n'a pas répondu."};
+const MERR={auth:"Clé Mistral refusée. Vérifie-la dans les réglages.",rate:"Mistral refuse la demande (limite ou plan non activé).",network:"Impossible de joindre Mistral depuis ici.",parse:"Réponse illisible, réessaie.",http:"Mistral n'a pas répondu."};
 async function mistralJSON(prompt,dataUrl,signal){
   const key=getKey();let last;
   for(const model of ["mistral-small-latest","pixtral-12b-latest"]){
     let r;
     try{r=await fetch("https://api.mistral.ai/v1/chat/completions",{method:"POST",signal,headers:{"Content-Type":"application/json","Authorization":"Bearer "+key},body:JSON.stringify({model,temperature:.2,response_format:{type:"json_object"},messages:[{role:"user",content:[{type:"text",text:prompt},{type:"image_url",image_url:dataUrl}]}]})})}
     catch(e){if(e&&e.name==="AbortError")throw {code:"cancelled"};throw {code:"network"}}
-    if(r.status===401||r.status===403)throw {code:"auth"};
-    if(r.status===429)throw {code:"rate"};
-    if(!r.ok){last={code:"http"};continue}
+    if(!r.ok){
+      let det="";try{const j=await r.json();det=String(j.message||(j.error&&j.error.message)||j.detail||JSON.stringify(j)).slice(0,160)}catch(_){}
+      last={code:r.status===401||r.status===403?"auth":r.status===429?"rate":"http",status:r.status,detail:det};
+      if(last.code==="auth")throw last;
+      continue;
+    }
     try{const j=await r.json(),t=j.choices[0].message.content;return JSON.parse(typeof t==="string"?t:t.map(x=>x.text||"").join(""))}catch(e){last={code:"parse"}}
   }
   throw last||{code:"http"};
@@ -1039,7 +1042,7 @@ async function analyseMeal(file){
     sheetMealForm(m,'<img src="'+img.url+'" alt="Ton repas" style="width:100%;max-height:200px;object-fit:cover;border-radius:14px;margin-bottom:10px"><div class="small" style="margin-bottom:12px"><span class="chip">Confiance '+esc(r.confiance||"moyenne")+'</span> '+esc(r.portion||"")+(li?'<ul style="margin:8px 0 0;padding-left:18px">'+li+'</ul>':'')+(r.remarque?'<div class="mute" style="margin-top:6px">'+esc(r.remarque)+'</div>':'')+''+macroBar(m)+advice(r)+'<div class="mute" style="margin-top:6px">Corrige les chiffres si besoin avant d\'ajouter.</div></div>');
   }catch(e){
     if(e&&e.code==="cancelled")return;
-    sheetMealForm(null,'<p class="small tone-bad" style="font-weight:700">'+((e&&MERR[e.code])||copyFor(e&&e.code))+' Tu peux saisir le repas à la main.</p>');
+    sheetMealForm(null,'<p class="small tone-bad" style="font-weight:700">'+((e&&MERR[e.code])||copyFor(e&&e.code))+(e&&e.status?' <span class="mute">(Mistral '+e.status+(e.detail?' : '+esc(e.detail):'')+')</span>':'')+' Tu peux saisir le repas à la main.</p>');
   }
 }
 function macroBar(m){
