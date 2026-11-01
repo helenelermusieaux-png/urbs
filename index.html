@@ -804,14 +804,14 @@ function dayMeals(d){return S.meals.filter(m=>m.date===d)}
 function sumM(ms){return ms.reduce((a,m)=>({k:a.k+(m.kcal||0),p:a.p+(m.p||0),g:a.g+(m.g||0),l:a.l+(m.l||0),f:a.f+(m.f||0)}),{k:0,p:0,g:0,l:0,f:0})}
 function vRepas(){
   const td=dayMeals(today()),t=sumM(td);
-  const photo=caps.sample&&caps.img;
+  const eng=engine(),photo=!!eng;
   const days=[];for(let i=1;i<=6;i++){const d=addDays(today(),-i),ms=dayMeals(d);if(ms.length)days.push([d,ms.length,sumM(ms).k])}
   return '<section class="card flat"><div class="cap">Aujourd\'hui</div><div class="row sp" style="margin-top:4px"><h2 class="num" style="font-size:26px">'+Math.round(t.k)+' <span class="small mute" style="font-family:var(--f-b);font-weight:700">kcal</span></h2><span class="small mute">'+td.length+' repas</span></div>'+
    '<div class="macros num"><div><b>'+Math.round(t.p)+'</b><span>Protéines g</span></div><div><b>'+Math.round(t.g)+'</b><span>Glucides g</span></div><div><b>'+Math.round(t.l)+'</b><span>Lipides g</span></div><div><b>'+Math.round(t.f)+'</b><span>Fibres g</span></div></div></section>'+
-   '<div class="row" style="margin-top:14px;flex-wrap:wrap">'+
-   (photo?'<label class="btn" for="photo" style="flex:1">Photographier mon repas</label><input id="photo" type="file" accept="image/*" hidden>':'')+
-   '<button class="btn ghost" style="flex:'+(photo?'0 0 auto':'1')+'" data-act="mealmanual">Ajouter à la main</button></div>'+
-   (!photo?'<p class="disc">L\'analyse par photo est disponible quand l\'appli est ouverte dans Claude.</p>':'')+
+   '<div class="row" style="margin-top:14px;flex-wrap:wrap;align-items:stretch">'+
+   (photo?'<label class="btn" for="photo" style="flex:1">Prendre une photo</label><input id="photo" type="file" accept="image/*" capture="environment" hidden><label class="btn sea" for="photo2" style="flex:1">Depuis la galerie</label><input id="photo2" type="file" accept="image/*" hidden>':'<button class="btn" style="flex:1" data-act="mkey">Activer l\'analyse photo</button>')+
+   '<button class="btn ghost" style="flex:1 1 100%" data-act="mealmanual">Ajouter à la main</button></div>'+
+   (eng==="mistral"?'<p class="disc">Analyse par Mistral (gratuit). <button class="x" data-act="mkey">Clé API</button></p>':!photo?'<p class="disc">Analyse gratuite par photo avec Mistral : une clé API gratuite suffit.</p>':'')+
    '<section class="card"><div class="cap">Repas du jour</div>'+(td.length?td.map(mealItem).join(""):'<div class="empty-note">Aucun repas enregistré. Prends ton assiette en photo, je m\'occupe du reste.</div>')+'</section>'+
    (days.length?'<section class="card"><div class="cap">Jours précédents</div>'+days.map(d=>'<div class="item"><div class="grow"><b>'+fmt(d[0],{weekday:"long",day:"numeric",month:"short"})+'</b><div class="small mute">'+d[1]+' repas</div></div><b class="num">'+Math.round(d[2])+' kcal</b></div>').join("")+'</section>':'')+
    (caps.dl?'<button class="btn sea block" style="margin-top:14px" data-act="export">Exporter le bilan pour un professionnel de santé</button>':'')+
@@ -996,30 +996,60 @@ async function genEp(id,n){
 }
 
 /* photo de repas */
+const MKEY="urbs-mistral";
+const getKey=()=>{try{return localStorage.getItem(MKEY)||""}catch(e){return ""}};
+const engine=()=>caps.sample&&caps.img?"claude":getKey()?"mistral":"";
+const MERR={auth:"Clé Mistral refusée. Vérifie-la dans les réglages.",rate:"Limite gratuite atteinte. Réessaie dans une minute.",network:"Impossible de joindre Mistral depuis ici.",parse:"Réponse illisible, réessaie.",http:"Mistral n'a pas répondu."};
+async function mistralJSON(prompt,dataUrl,signal){
+  const key=getKey();let last;
+  for(const model of ["mistral-small-latest","pixtral-12b-latest"]){
+    let r;
+    try{r=await fetch("https://api.mistral.ai/v1/chat/completions",{method:"POST",signal,headers:{"Content-Type":"application/json","Authorization":"Bearer "+key},body:JSON.stringify({model,temperature:.2,response_format:{type:"json_object"},messages:[{role:"user",content:[{type:"text",text:prompt},{type:"image_url",image_url:dataUrl}]}]})})}
+    catch(e){if(e&&e.name==="AbortError")throw {code:"cancelled"};throw {code:"network"}}
+    if(r.status===401||r.status===403)throw {code:"auth"};
+    if(r.status===429)throw {code:"rate"};
+    if(!r.ok){last={code:"http"};continue}
+    try{const j=await r.json(),t=j.choices[0].message.content;return JSON.parse(typeof t==="string"?t:t.map(x=>x.text||"").join(""))}catch(e){last={code:"parse"}}
+  }
+  throw last||{code:"http"};
+}
+function sheetMistral(){
+  const has=!!getKey();
+  openSheet("Analyse photo gratuite",'<div class="form"><p class="small mute" style="margin:0">Mistral propose un accès gratuit. Crée un compte sur <b>console.mistral.ai</b>, choisis le plan gratuit « Experiment », génère une clé API et colle-la ici. Elle reste enregistrée sur ce téléphone, rien d\'autre ne la reçoit.</p><label class="f">Clé API Mistral<input id="mk" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="'+(has?'Clé enregistrée (remplacer)':'Colle ta clé ici')+'"></label><button class="btn block" data-act="mkeysave">Enregistrer</button>'+(has?'<button class="btn ghost block" data-act="mkeydel">Supprimer la clé</button>':'')+'<p class="small mute" style="margin:0">Tes photos de repas sont envoyées à Mistral pour l\'analyse.</p></div>');
+}
 async function shrink(file){
   const bmp=await createImageBitmap(file);
   const k=Math.min(1,1024/Math.max(bmp.width,bmp.height));
   const c=document.createElement("canvas");c.width=Math.round(bmp.width*k);c.height=Math.round(bmp.height*k);
   c.getContext("2d").drawImage(bmp,0,0,c.width,c.height);
   const blob=await new Promise(r=>c.toBlob(r,"image/jpeg",.82));
-  return {blob,url:c.toDataURL("image/jpeg",.6)};
+  return {blob,url:c.toDataURL("image/jpeg",.6),big:c.toDataURL("image/jpeg",.82)};
 }
 async function analyseMeal(file){
   ctl=new AbortController();
   openSheet("Analyse du repas",'<div class="row" id="mst"><div class="spin"></div><span class="small mute">Je regarde ton assiette…</span></div><button class="btn ghost block" style="margin-top:14px" data-act="close">Annuler</button>');
   let img;
   try{img=await shrink(file)}catch(e){sheetMealForm(null,'<p class="small tone-bad" style="font-weight:700">Photo illisible. Tu peux saisir le repas à la main.</p>');return}
-  const prompt="Tu es diététicien. Analyse la photo de ce repas et estime son contenu nutritionnel pour la portion visible. Réponds uniquement par un objet JSON de cette forme : {\"nom\":\"nom court du plat en français\",\"portion\":\"description courte\",\"kcal\":650,\"proteines_g\":30,\"glucides_g\":70,\"lipides_g\":25,\"fibres_g\":8,\"aliments\":[{\"nom\":\"riz\",\"g\":180,\"kcal\":230}],\"confiance\":\"faible|moyenne|bonne\",\"remarque\":\"une phrase\"}. Maximum 6 aliments. Si l'image n'est pas un repas, mets kcal à 0 et explique dans remarque.";
+  const prompt="Tu es diététicien. Analyse la photo de ce repas et estime son contenu nutritionnel pour la portion visible. Réponds uniquement par un objet JSON de cette forme : {\"nom\":\"nom court du plat en français\",\"portion\":\"description courte\",\"kcal\":650,\"proteines_g\":30,\"glucides_g\":70,\"lipides_g\":25,\"fibres_g\":8,\"aliments\":[{\"nom\":\"riz\",\"g\":180,\"kcal\":230}],\"confiance\":\"faible|moyenne|bonne\",\"remarque\":\"une phrase\",\"conseils\":[\"2 à 3 propositions courtes et bienveillantes pour équilibrer ce repas ou le prochain (ex. ajouter des légumes, plus de protéines)\"]}. Maximum 6 aliments. Si l'image n'est pas un repas, mets kcal à 0 et explique dans remarque.";
   try{
-    const r=await caps.sample.json(prompt,{images:img.blob,cache:false,signal:ctl.signal});
+    const r=engine()==='claude'?await caps.sample.json(prompt,{images:img.blob,cache:false,signal:ctl.signal}):await mistralJSON(prompt,img.big,ctl.signal);
     ctl=null;
     const m={nom:r.nom||"Repas",kcal:num(r.kcal)||0,p:num(r.proteines_g)||0,g:num(r.glucides_g)||0,l:num(r.lipides_g)||0,f:num(r.fibres_g)||0};
     const li=(r.aliments||[]).slice(0,6).map(a=>'<li>'+esc(a.nom)+' · '+Math.round(num(a.g)||0)+' g · '+Math.round(num(a.kcal)||0)+' kcal</li>').join("");
-    sheetMealForm(m,'<img src="'+img.url+'" alt="Ton repas" style="width:100%;max-height:200px;object-fit:cover;border-radius:14px;margin-bottom:10px"><div class="small" style="margin-bottom:12px"><span class="chip">Confiance '+esc(r.confiance||"moyenne")+'</span> '+esc(r.portion||"")+(li?'<ul style="margin:8px 0 0;padding-left:18px">'+li+'</ul>':'')+(r.remarque?'<div class="mute" style="margin-top:6px">'+esc(r.remarque)+'</div>':'')+'<div class="mute" style="margin-top:6px">Corrige les chiffres si besoin avant d\'ajouter.</div></div>');
+    sheetMealForm(m,'<img src="'+img.url+'" alt="Ton repas" style="width:100%;max-height:200px;object-fit:cover;border-radius:14px;margin-bottom:10px"><div class="small" style="margin-bottom:12px"><span class="chip">Confiance '+esc(r.confiance||"moyenne")+'</span> '+esc(r.portion||"")+(li?'<ul style="margin:8px 0 0;padding-left:18px">'+li+'</ul>':'')+(r.remarque?'<div class="mute" style="margin-top:6px">'+esc(r.remarque)+'</div>':'')+''+macroBar(m)+advice(r)+'<div class="mute" style="margin-top:6px">Corrige les chiffres si besoin avant d\'ajouter.</div></div>');
   }catch(e){
     if(e&&e.code==="cancelled")return;
-    sheetMealForm(null,'<p class="small tone-bad" style="font-weight:700">'+copyFor(e&&e.code)+' Tu peux saisir le repas à la main.</p>');
+    sheetMealForm(null,'<p class="small tone-bad" style="font-weight:700">'+((e&&MERR[e.code])||copyFor(e&&e.code))+' Tu peux saisir le repas à la main.</p>');
   }
+}
+function macroBar(m){
+  const p=m.p*4,g=m.g*4,l=m.l*9,t=p+g+l;if(!t)return "";
+  const pc=x=>Math.round(x/t*100);
+  return '<div style="margin-top:10px"><div class="cap">Répartition des calories</div><div style="display:flex;height:12px;border-radius:99px;overflow:hidden;margin-top:6px"><i style="width:'+pc(p)+'%;background:var(--terra)"></i><i style="width:'+pc(g)+'%;background:var(--gold)"></i><i style="width:'+pc(l)+'%;background:var(--sea)"></i></div><div class="small mute num" style="margin-top:4px">Protéines '+pc(p)+' % · Glucides '+pc(g)+' % · Lipides '+pc(l)+' %</div></div>';
+}
+function advice(r){
+  const a=(Array.isArray(r.conseils)?r.conseils:[]).filter(x=>typeof x==="string"&&x.trim()).slice(0,3);
+  return a.length?'<div style="margin-top:10px"><div class="cap">Propositions</div><ul style="margin:6px 0 0;padding-left:18px">'+a.map(x=>'<li>'+esc(x)+'</li>').join("")+'</ul></div>':"";
 }
 
 /* export */
@@ -1041,6 +1071,9 @@ function act(a,x,y,el){
   switch(a){
   case "tab":tab=x;render();window.scrollTo(0,0);break;
   case "close":closeSheet();break;
+  case "mkey":sheetMistral();break;
+  case "mkeysave":{const k=val("mk").trim();if(k){try{localStorage.setItem(MKEY,k)}catch(e){toast("Impossible d'enregistrer la clé ici");return}}closeSheet();render();toast(k?"Clé enregistrée":"Rien à enregistrer");break}
+  case "mkeydel":{try{localStorage.removeItem(MKEY)}catch(e){}closeSheet();render();break}
   case "tile":sheetTile(+x);break;
   case "amenager":{const N=GN(),c=(N-1)/2;let best=-1,bd=1e9;S.grid.forEach((b,i)=>{if(!b&&!isRoad(i)){const d=Math.hypot(i%N-c,Math.floor(i/N)-c);if(d<bd){bd=d;best=i}}});if(best>=0)sheetTile(best);break}
   case "build":{const c=CAT[y];if(S.den<c.c)return;S.den-=c.c;S.grid[+x]={t:y,l:1,x:0};S.log.unshift({d:today(),t:c.n+" installé"});S.log=S.log.slice(0,12);persist();closeSheet();render();toast(c.n+" installé !");break}
@@ -1098,7 +1131,7 @@ function act(a,x,y,el){
   }
 }
 document.addEventListener("click",e=>{const el=e.target.closest("[data-act]");if(!el||el.disabled)return;act(el.dataset.act,el.dataset.a,el.dataset.b,el)});
-document.addEventListener("change",e=>{if(e.target&&e.target.id==="photo"&&e.target.files&&e.target.files[0]){const f=e.target.files[0];e.target.value="";analyseMeal(f)}});
+document.addEventListener("change",e=>{if(e.target&&(e.target.id==="photo"||e.target.id==="photo2")&&e.target.files&&e.target.files[0]){const f=e.target.files[0];e.target.value="";analyseMeal(f)}});
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("#sheet").hidden)closeSheet();if((e.key==="Enter"||e.key===" ")&&e.target.getAttribute&&e.target.getAttribute("role")==="button"&&e.target.dataset&&e.target.dataset.act){e.preventDefault();act(e.target.dataset.act,e.target.dataset.a,e.target.dataset.b,e.target)}});
 
 /* ---------- démarrage ---------- */
