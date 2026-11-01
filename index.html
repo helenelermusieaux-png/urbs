@@ -898,7 +898,7 @@ function vCorps(){
    '<div class="tiles" style="margin-top:14px">'+tiles+'</div>'+
    (S.body.length?'<section class="card"><div class="cap">Historique</div><div class="scroll" style="margin-top:8px"><table><thead><tr><th>Date</th><th>Poids</th><th>Taille</th><th>Hanch.</th><th>Poitr.</th><th>Bras</th><th>Cuisse</th><th></th></tr></thead><tbody>'+rows+'</tbody></table></div></section>':'')+
    (caps.dl&&(S.body.length||S.meals.length)?'<button class="btn sea block" style="margin-top:14px" data-act="export">Exporter le bilan pour un professionnel de santé</button>':'')+
-   '<section class="card"><div class="cap">Sauvegarde de l\'appli</div><p class="small mute" style="margin:6px 0 12px">Tes données sont gardées sur ce téléphone. Fais une sauvegarde de temps en temps : si le navigateur vide ses données, tu pourras tout retrouver.</p><div class="row" style="flex-wrap:wrap;align-items:stretch"><button class="btn ghost" style="flex:1" data-act="backup">Sauvegarder</button><label class="btn ghost" for="restore" style="flex:1">Restaurer</label><input id="restore" type="file" accept="application/json,.json" hidden></div><div class="row sp" style="margin-top:12px;align-items:flex-start"><div id="syncnote" class="small mute" style="flex:1">'+syncText()+'</div><button class="btn sea sm" data-act="syncopen">'+(syncCode()?'Régler':'Synchroniser')+'</button></div></section>';
+   '<section class="card"><div class="cap">Sauvegarde de l\'appli</div><p class="small mute" style="margin:6px 0 12px">Tes données sont gardées sur ce téléphone. Une sauvegarde est proposée chaque semaine. '+(S.lastBackup?'Dernière : '+fmt(S.lastBackup)+'.':'Aucune pour l\'instant.')+'</p><div class="row" style="flex-wrap:wrap;align-items:stretch"><button class="btn ghost" style="flex:1" data-act="backup">Sauvegarder</button><label class="btn ghost" for="restore" style="flex:1">Restaurer</label><input id="restore" type="file" accept="application/json,.json" hidden></div><div class="row sp" style="margin-top:12px;align-items:flex-start"><div id="syncnote" class="small mute" style="flex:1">'+syncText()+'</div><button class="btn sea sm" data-act="syncopen">'+(syncCode()?'Régler':'Synchroniser')+'</button></div></section>';
 }
 
 function stars(n){let s="";for(let i=1;i<=5;i++)s+=i<=n?"★":"☆";return s}
@@ -1121,11 +1121,21 @@ async function syncPull(){
   if(r.status===200&&r.j.doc){S=r.j.doc;migrate();rollWeek();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}rs.st="ok";rs.t=Date.now();closeSheet();render();toast("Données récupérées")}else toast("Serveur injoignable");
 }
 async function syncPush(){await pushRemote();closeSheet();render();toast(rs.st==="ok"?"Synchronisation activée":"Serveur injoignable")}
+/* rappel de sauvegarde hebdomadaire */
+function backupDue(){
+  if(!(S.xp>0||S.body.length||S.meals.length))return false;
+  if(S.backupSnooze===today())return false;
+  return !S.lastBackup||(new Date(today())-new Date(S.lastBackup))/864e5>=7;
+}
+function sheetBackupReminder(){
+  openSheet("Sauvegarde de la semaine",'<div class="form"><p style="margin:0">'+(S.lastBackup?'Ta dernière sauvegarde date du '+fmt(S.lastBackup)+'.':'Tu n\'as pas encore de sauvegarde.')+' Un fichier suffit pour tout retrouver si ton téléphone ou ton navigateur perd les données.</p><button class="btn block" data-act="backup">Sauvegarder maintenant</button><button class="btn ghost block" data-act="backuplater">Plus tard</button></div>');
+}
 /* sauvegarde / restauration */
 function backupData(){
   const data=JSON.stringify(S),name="clairiere-sauvegarde-"+today()+".json";
-  if(caps.dl){caps.dl.save({filename:name,data}).then(()=>toast("Sauvegarde enregistrée")).catch(e=>{if(!e||e.code!=="declined")toast("Sauvegarde impossible ici")});return}
-  try{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([data],{type:"application/json"}));a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1500);toast("Sauvegarde téléchargée")}catch(e){toast("Sauvegarde impossible ici")}
+  const done=m=>{S.lastBackup=today();persist();closeSheet();render();toast(m)};
+  if(caps.dl){caps.dl.save({filename:name,data}).then(()=>done("Sauvegarde enregistrée")).catch(e=>{if(!e||e.code!=="declined")toast("Sauvegarde impossible ici")});return}
+  try{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([data],{type:"application/json"}));a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1500);done("Sauvegarde téléchargée")}catch(e){toast("Sauvegarde impossible ici")}
 }
 async function restoreData(file){
   try{
@@ -1199,6 +1209,7 @@ function act(a,x,y,el){
   case "bodydel":S.body=S.body.filter(b=>b.date!==x);persist();render();break;
   case "export":exportBilan();break;
   case "backup":backupData();break;
+  case "backuplater":S.backupSnooze=today();persist();closeSheet();break;
   case "syncopen":sheetSync();break;
   case "syncsave":{const c=val("sc").trim();if(!c){toast("Entre ton code");return}syncConnect(c);break}
   case "syncpull":syncPull();break;
@@ -1247,6 +1258,7 @@ async function boot(){
   if(!$("#sheet").hidden&&!S.pending.length){}else if(S.pending.length&&$("#sheet").hidden)sheetPending();
   if($("#sheet").hidden)render();else{renderHead();renderTabs()}
   if(syncCode())pullRemote();
+  if($("#sheet").hidden&&backupDue())setTimeout(()=>{if($("#sheet").hidden)sheetBackupReminder()},1200);
 }
 boot();
 })();
