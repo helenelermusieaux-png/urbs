@@ -655,6 +655,7 @@ function persist(){
   S.upd=Date.now();
   try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}
   clearTimeout(saveTimer);saveTimer=setTimeout(pushDb,700);
+  if(syncCode()){clearTimeout(remoteT);remoteT=setTimeout(pushRemote,2500)}
 }
 async function pushDb(){
   if(!docRef)return;
@@ -897,7 +898,7 @@ function vCorps(){
    '<div class="tiles" style="margin-top:14px">'+tiles+'</div>'+
    (S.body.length?'<section class="card"><div class="cap">Historique</div><div class="scroll" style="margin-top:8px"><table><thead><tr><th>Date</th><th>Poids</th><th>Taille</th><th>Hanch.</th><th>Poitr.</th><th>Bras</th><th>Cuisse</th><th></th></tr></thead><tbody>'+rows+'</tbody></table></div></section>':'')+
    (caps.dl&&(S.body.length||S.meals.length)?'<button class="btn sea block" style="margin-top:14px" data-act="export">Exporter le bilan pour un professionnel de santé</button>':'')+
-   '<section class="card"><div class="cap">Sauvegarde de l\'appli</div><p class="small mute" style="margin:6px 0 12px">Tes données sont gardées sur ce téléphone. Fais une sauvegarde de temps en temps : si le navigateur vide ses données, tu pourras tout retrouver.</p><div class="row" style="flex-wrap:wrap;align-items:stretch"><button class="btn ghost" style="flex:1" data-act="backup">Sauvegarder</button><label class="btn ghost" for="restore" style="flex:1">Restaurer</label><input id="restore" type="file" accept="application/json,.json" hidden></div></section>';
+   '<section class="card"><div class="cap">Sauvegarde de l\'appli</div><p class="small mute" style="margin:6px 0 12px">Tes données sont gardées sur ce téléphone. Fais une sauvegarde de temps en temps : si le navigateur vide ses données, tu pourras tout retrouver.</p><div class="row" style="flex-wrap:wrap;align-items:stretch"><button class="btn ghost" style="flex:1" data-act="backup">Sauvegarder</button><label class="btn ghost" for="restore" style="flex:1">Restaurer</label><input id="restore" type="file" accept="application/json,.json" hidden></div><div class="row sp" style="margin-top:12px;align-items:flex-start"><div id="syncnote" class="small mute" style="flex:1">'+syncText()+'</div><button class="btn sea sm" data-act="syncopen">'+(syncCode()?'Régler':'Synchroniser')+'</button></div></section>';
 }
 
 function stars(n){let s="";for(let i=1;i<=5;i++)s+=i<=n?"★":"☆";return s}
@@ -1056,6 +1057,70 @@ function advice(r){
   return a.length?'<div style="margin-top:10px"><div class="cap">Propositions</div><ul style="margin:6px 0 0;padding-left:18px">'+a.map(x=>'<li>'+esc(x)+'</li>').join("")+'</ul></div>':"";
 }
 
+/* synchronisation MongoDB (serveur perso) */
+const SYNC_URL="https://urbs-api.onrender.com",SKEY="urbs-sync";
+const syncCode=()=>{try{return localStorage.getItem(SKEY)||""}catch(e){return ""}};
+const rs={st:syncCode()?"wait":"off",t:0};
+let remoteT=null;
+async function remote(method,code,body){
+  const ctl=new AbortController(),to=setTimeout(()=>ctl.abort(),80000);
+  try{
+    const r=await fetch(SYNC_URL+"/api/save",{method,signal:ctl.signal,headers:{"x-app-code":code,"Content-Type":"application/json"},body:body?JSON.stringify(body):undefined});
+    let j={};try{j=await r.json()}catch(_){}
+    return {status:r.status,j};
+  }catch(e){return {status:0,j:{}}}
+  finally{clearTimeout(to)}
+}
+async function pushRemote(){
+  const c=syncCode();if(!c)return;
+  rs.st="wait";
+  const r=await remote("PUT",c,{doc:S});
+  rs.st=r.status===200?"ok":r.status===401?"auth":r.status===409?"newer":"err";if(rs.st==="ok")rs.t=Date.now();
+  refreshSyncNote();
+}
+async function pullRemote(){
+  const c=syncCode();if(!c)return;
+  rs.st="wait";refreshSyncNote();
+  const r=await remote("GET",c);
+  if(r.status===200){
+    const d=r.j&&r.j.doc;
+    if(d&&r.j.upd>(S.upd||0)&&Array.isArray(d.grid)){S=d;migrate();rollWeek();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}render();toast("Données récupérées du serveur");rs.st="ok";rs.t=Date.now()}
+    else await pushRemote();
+  }else rs.st=r.status===401?"auth":"err";
+  refreshSyncNote();
+}
+function syncText(){
+  if(rs.st==="off")return "Synchronisation désactivée.";
+  if(rs.st==="ok")return "Synchronisé"+(rs.t?" à "+new Date(rs.t).toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"}):"")+".";
+  if(rs.st==="wait")return "Synchronisation en cours… le serveur gratuit peut mettre une minute à se réveiller.";
+  if(rs.st==="auth")return "Code refusé par le serveur.";
+  if(rs.st==="newer")return "Le serveur a des données plus récentes. Recharge la page pour les récupérer.";
+  return "Serveur injoignable pour l'instant. Tes données restent sur ce téléphone.";
+}
+function refreshSyncNote(){const n=document.getElementById("syncnote");if(n)n.textContent=syncText()}
+function sheetSync(){
+  const has=!!syncCode();
+  openSheet("Synchronisation",'<div class="form"><p class="small mute" style="margin:0">Tes données sont copiées dans ta base MongoDB, via ton petit serveur. Entre le code secret que tu as choisi (variable APP_CODE sur Render).</p><label class="f">Code secret<input id="sc" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="'+(has?'Code enregistré (remplacer)':'Ton code')+'"></label><div id="syncst" class="small mute"></div><button class="btn block" data-act="syncsave">Activer</button>'+(has?'<button class="btn ghost block" data-act="syncoff">Désactiver</button>':'')+'</div>');
+}
+async function syncConnect(code){
+  const st=()=>document.getElementById("syncst");
+  if(st())st().innerHTML='<div class="row"><div class="spin"></div><span>Connexion au serveur… (jusqu\'à une minute s\'il dormait)</span></div>';
+  const r=await remote("GET",code);
+  if(r.status===401){if(st())st().innerHTML='<span class="tone-bad" style="font-weight:700">Code refusé.</span>';return}
+  if(r.status!==200){if(st())st().innerHTML='<span class="tone-bad" style="font-weight:700">Serveur injoignable pour l\'instant. Réessaie dans un moment.</span>';return}
+  try{localStorage.setItem(SKEY,code)}catch(e){toast("Impossible d'enregistrer ici");return}
+  const d=r.j&&r.j.doc;
+  if(d&&Array.isArray(d.grid)){
+    openSheet("Données trouvées",'<div class="form"><p style="margin:0">Le serveur contient déjà des données (niveau '+lvlOf(d.xp||0)+').</p><button class="btn block" data-act="syncpull">Récupérer celles du serveur</button><button class="btn ghost block" data-act="syncpush">Écraser avec celles de ce téléphone</button></div>');
+    return;
+  }
+  await pushRemote();closeSheet();render();toast(rs.st==="ok"?"Synchronisation activée":"Activée, serveur injoignable");
+}
+async function syncPull(){
+  const r=await remote("GET",syncCode());
+  if(r.status===200&&r.j.doc){S=r.j.doc;migrate();rollWeek();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}rs.st="ok";rs.t=Date.now();closeSheet();render();toast("Données récupérées")}else toast("Serveur injoignable");
+}
+async function syncPush(){await pushRemote();closeSheet();render();toast(rs.st==="ok"?"Synchronisation activée":"Serveur injoignable")}
 /* sauvegarde / restauration */
 function backupData(){
   const data=JSON.stringify(S),name="clairiere-sauvegarde-"+today()+".json";
@@ -1134,6 +1199,11 @@ function act(a,x,y,el){
   case "bodydel":S.body=S.body.filter(b=>b.date!==x);persist();render();break;
   case "export":exportBilan();break;
   case "backup":backupData();break;
+  case "syncopen":sheetSync();break;
+  case "syncsave":{const c=val("sc").trim();if(!c){toast("Entre ton code");return}syncConnect(c);break}
+  case "syncpull":syncPull();break;
+  case "syncpush":syncPush();break;
+  case "syncoff":{try{localStorage.removeItem(SKEY)}catch(e){}rs.st="off";closeSheet();render();break}
   case "lfilter":lfilter=x;render();break;
   case "leisureadd":sheetLeisure();break;
   case "star":{window.__rate=+x;document.querySelectorAll("#stars button").forEach((b,i)=>b.classList.toggle("on",i<+x));break}
@@ -1176,6 +1246,7 @@ async function boot(){
   }
   if(!$("#sheet").hidden&&!S.pending.length){}else if(S.pending.length&&$("#sheet").hidden)sheetPending();
   if($("#sheet").hidden)render();else{renderHead();renderTabs()}
+  if(syncCode())pullRemote();
 }
 boot();
 })();

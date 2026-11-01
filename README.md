@@ -8,3 +8,8 @@ mesures du corps et loisirs font grandir une forêt en 3D (Three.js) peuplée d'
 
 Hors de Claude, l'analyse de photo, l'écriture des épisodes et la sauvegarde cloud sont
 désactivées. Les données restent dans le navigateur (localStorage).
+
+## Synchronisation (optionnelle)
+
+`server/` contient une petite API Node qui enregistre la sauvegarde dans MongoDB.
+Variables d'environnement : `MONGODB_URI` (chaîne de connexion Atlas) et `APP_CODE` (code secret, à saisir dans l'appli).
