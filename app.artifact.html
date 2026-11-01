@@ -888,7 +888,8 @@ function vCorps(){
   return av+'<section class="card flat"><div class="row sp"><div><div class="cap">Évolution du poids</div><div class="small mute" style="margin-top:2px">'+(th?'Taille '+fn(th)+' cm':'Taille non renseignée')+(i?' · IMC '+fn(i):'')+'</div></div><button class="btn" data-act="bodyadd">Nouvelle mesure</button></div><div style="margin-top:12px">'+spark()+'</div></section>'+
    '<div class="tiles" style="margin-top:14px">'+tiles+'</div>'+
    (S.body.length?'<section class="card"><div class="cap">Historique</div><div class="scroll" style="margin-top:8px"><table><thead><tr><th>Date</th><th>Poids</th><th>Taille</th><th>Hanch.</th><th>Poitr.</th><th>Bras</th><th>Cuisse</th><th></th></tr></thead><tbody>'+rows+'</tbody></table></div></section>':'')+
-   (caps.dl&&(S.body.length||S.meals.length)?'<button class="btn sea block" style="margin-top:14px" data-act="export">Exporter le bilan pour un professionnel de santé</button>':'');
+   (caps.dl&&(S.body.length||S.meals.length)?'<button class="btn sea block" style="margin-top:14px" data-act="export">Exporter le bilan pour un professionnel de santé</button>':'')+
+   '<section class="card"><div class="cap">Sauvegarde de l\'appli</div><p class="small mute" style="margin:6px 0 12px">Tes données sont gardées sur ce téléphone. Fais une sauvegarde de temps en temps : si le navigateur vide ses données, tu pourras tout retrouver.</p><div class="row" style="flex-wrap:wrap;align-items:stretch"><button class="btn ghost" style="flex:1" data-act="backup">Sauvegarder</button><label class="btn ghost" for="restore" style="flex:1">Restaurer</label><input id="restore" type="file" accept="application/json,.json" hidden></div></section>';
 }
 
 function stars(n){let s="";for(let i=1;i<=5;i++)s+=i<=n?"★":"☆";return s}
@@ -1047,6 +1048,19 @@ function advice(r){
   return a.length?'<div style="margin-top:10px"><div class="cap">Propositions</div><ul style="margin:6px 0 0;padding-left:18px">'+a.map(x=>'<li>'+esc(x)+'</li>').join("")+'</ul></div>':"";
 }
 
+/* sauvegarde / restauration */
+function backupData(){
+  const data=JSON.stringify(S),name="clairiere-sauvegarde-"+today()+".json";
+  if(caps.dl){caps.dl.save({filename:name,data}).then(()=>toast("Sauvegarde enregistrée")).catch(e=>{if(!e||e.code!=="declined")toast("Sauvegarde impossible ici")});return}
+  try{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([data],{type:"application/json"}));a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1500);toast("Sauvegarde téléchargée")}catch(e){toast("Sauvegarde impossible ici")}
+}
+async function restoreData(file){
+  try{
+    const o=JSON.parse(await file.text());
+    if(!o||typeof o!=="object"||!Array.isArray(o.grid)||typeof o.xp!=="number")throw 0;
+    S=o;migrate();rollWeek();persist();render();toast("Données restaurées");
+  }catch(e){toast("Fichier non reconnu")}
+}
 /* export */
 function csv(rows){return "﻿"+rows.map(r=>r.map(c=>{c=c==null?"":String(c);return /[;"\n]/.test(c)?'"'+c.replace(/"/g,'""')+'"':c}).join(";")).join("\r\n")}
 function exportBilan(){
@@ -1111,6 +1125,7 @@ function act(a,x,y,el){
     gain(10,5,0,"Mesure notée.");persist();closeSheet();render();break}
   case "bodydel":S.body=S.body.filter(b=>b.date!==x);persist();render();break;
   case "export":exportBilan();break;
+  case "backup":backupData();break;
   case "lfilter":lfilter=x;render();break;
   case "leisureadd":sheetLeisure();break;
   case "star":{window.__rate=+x;document.querySelectorAll("#stars button").forEach((b,i)=>b.classList.toggle("on",i<+x));break}
@@ -1126,12 +1141,13 @@ function act(a,x,y,el){
   }
 }
 document.addEventListener("click",e=>{const el=e.target.closest("[data-act]");if(!el||el.disabled)return;act(el.dataset.act,el.dataset.a,el.dataset.b,el)});
-document.addEventListener("change",e=>{if(e.target&&(e.target.id==="photo"||e.target.id==="photo2")&&e.target.files&&e.target.files[0]){const f=e.target.files[0];e.target.value="";analyseMeal(f)}});
+document.addEventListener("change",e=>{if(e.target&&e.target.id==="restore"&&e.target.files&&e.target.files[0]){const f=e.target.files[0];e.target.value="";restoreData(f);return}if(e.target&&(e.target.id==="photo"||e.target.id==="photo2")&&e.target.files&&e.target.files[0]){const f=e.target.files[0];e.target.value="";analyseMeal(f)}});
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("#sheet").hidden)closeSheet();if((e.key==="Enter"||e.key===" ")&&e.target.getAttribute&&e.target.getAttribute("role")==="button"&&e.target.dataset&&e.target.dataset.act){e.preventDefault();act(e.target.dataset.act,e.target.dataset.a,e.target.dataset.b,e.target)}});
 
 /* ---------- démarrage ---------- */
 function migrate(){const f=fresh();Object.keys(f).forEach(k=>{if(S[k]===undefined)S[k]=f[k]});S.grid.forEach(b=>{if(b&&MAPK[b.t])b.t=MAPK[b.t]});growIfNeeded()}
 async function boot(){
+  try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}
   S=loadLocal()||fresh();migrate();rollWeek();render();
   if(S.pending.length)sheetPending();
   const C=window.claude;
