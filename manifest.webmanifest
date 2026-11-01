@@ -1,0 +1,17 @@
+{
+  "name": "Clairière",
+  "short_name": "Clairière",
+  "description": "Ta forêt qui grandit avec tes séances, tes objectifs, tes repas et tes mesures.",
+  "lang": "fr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#EEF3E2",
+  "theme_color": "#2E8C50",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
