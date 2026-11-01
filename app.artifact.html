@@ -931,7 +931,7 @@ function act(a,x,y,el){
   case "repair":{const b=S.grid[+x],c=repCost(b.t,b.l);if(S.den<c)return;S.den-=c;b.x=0;persist();render();sheetTile(+x);toast("Aménagement remis en état");break}
   case "c3rot":C3.azT+=(+x)*Math.PI/4;C3.dirty=true;break;
   case "c3zoom":C3.rad=Math.max(9,Math.min(24,C3.rad*(+x>0?.8:1.25)));C3.dirty=true;break;
-  case "sport":sheetSport();break;
+  case "sport":act("sportlog","Salle de sport");break;
   case "sportlog":{
     S.sport.push({date:today(),type:x});
     let m="";
