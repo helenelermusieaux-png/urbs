@@ -16,7 +16,7 @@
 <title>Clairière</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=DM+Sans:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* Layout: une appli mobile en colonne, en-tête collant (niveau, glands, lucioles), contenu par onglet, barre d'onglets en bas. La forêt est une grille de 6x6 tuiles vue du dessus, façon Caesar III. */
 :root{
@@ -30,7 +30,7 @@
   --danger:#C23B30; --ok:#2E7D4F; --shade:rgba(74,59,46,.2);
   --f-d:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif; --f-b:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
 }
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+@media not all{:root:not([data-theme="light"]){
   --bg:#0E1512; --card:#161F1A; --ink:#EAF0EA; --mute:#9AA9A0; --line:#25322B;
   --sea:#F0A458; --sea-d:#B0722F; --on-sea:#2A1606;
   --terra:#6FCF84; --terra-d:#3C8F52; --on-terra:#0C2314;
@@ -102,7 +102,7 @@ h1,h2,h3{font-family:var(--f-d);font-weight:700;margin:0;text-wrap:balance;lette
 .slot.on{background:var(--olive);border:3px solid var(--olive-d);color:#fff}
 .slot svg{width:20px;height:20px}
 .tone-ok{color:var(--ok)}.tone-warn{color:var(--gold-d)}.tone-bad{color:var(--danger)}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .tone-warn{color:var(--gold)}}
+@media not all{:root:not([data-theme="light"]) .tone-warn{color:var(--gold)}}
 :root[data-theme="dark"] .tone-warn{color:var(--gold)}
 
 /* forêt */
@@ -245,7 +245,7 @@ th{color:var(--mute);font-size:11px;text-transform:uppercase;letter-spacing:.06e
 .tab{background:none;border:0;border-radius:14px;padding:6px 0;display:grid;justify-items:center;gap:2px;font:700 10.5px var(--f-b);white-space:nowrap;letter-spacing:-.1px;color:var(--mute);cursor:pointer;min-height:52px}
 .tab svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .tab[aria-current="page"]{color:var(--terra);background:color-mix(in srgb,var(--terra) 12%,var(--card))}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .tab[aria-current="page"]{color:var(--terra)}}
+@media not all{:root:not([data-theme="light"]) .tab[aria-current="page"]{color:var(--terra)}}
 
 /* feuille */
 #sheet{position:fixed;inset:0;z-index:60}
@@ -267,7 +267,7 @@ th{color:var(--mute);font-size:11px;text-transform:uppercase;letter-spacing:.06e
 
 /* ===== passe design moderne : surfaces douces, ombres diffuses, typo Inter ===== */
 :root{--sh1:0 1px 2px rgba(18,32,24,.05),0 12px 28px -16px rgba(18,32,24,.18);--sh2:0 1px 2px rgba(18,32,24,.06)}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--sh1:0 1px 2px rgba(0,0,0,.4),0 12px 28px -16px rgba(0,0,0,.6)}}
+@media not all{:root:not([data-theme="light"]){--sh1:0 1px 2px rgba(0,0,0,.4),0 12px 28px -16px rgba(0,0,0,.6)}}
 :root[data-theme="dark"]{--sh1:0 1px 2px rgba(0,0,0,.4),0 12px 28px -16px rgba(0,0,0,.6)}
 body{font-size:15px;letter-spacing:-.006em;-webkit-font-smoothing:antialiased}
 h1,h2,h3{letter-spacing:-.022em;font-weight:700}
@@ -299,13 +299,74 @@ input:focus,select:focus,textarea:focus{outline:0;border-color:var(--terra);box-
 .tabs{background:color-mix(in srgb,var(--card) 80%,transparent);-webkit-backdrop-filter:saturate(1.4) blur(18px);backdrop-filter:saturate(1.4) blur(18px);border-top:1px solid var(--line)}
 .tab{font-weight:600}
 .tab[aria-current="page"]{background:color-mix(in srgb,var(--terra) 13%,transparent);color:var(--terra-d)}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .tab[aria-current="page"]{color:var(--terra)}}
+@media not all{:root:not([data-theme="light"]) .tab[aria-current="page"]{color:var(--terra)}}
 .stage{border:1px solid var(--line);border-radius:26px;box-shadow:var(--sh1)}
 .hchip,.hud-bot,.mini-hit span,.c3btn button{border-width:1px}
 .hud-bot{border-radius:20px}
 .slot{border-width:2px}
 .sheet,#sheet>div{box-shadow:0 -12px 40px -12px rgba(0,0,0,.25)}
 .qb{border-width:1px!important;font-weight:600!important}
+
+/* ===== Lisière — design system Clairière (V1) ===== */
+:root{
+ --paper:#f3efe4;--card:#ffffff;--ink:#1f261d;--ink-2:#4d5647;--mute:#5d6657;--mute-2:#7d8676;
+ --line:#e2dac7;--line-2:#cec4a9;--moss:#2e6b44;--moss-2:#3f8b58;--moss-ink:#e4eddc;
+ --gold:#b8811a;--gold-soft:#f7edd3;--night:#16211c;--night-2:#223228;--danger:#a93b2c;
+ --bg:var(--paper);--terra:var(--moss);--terra-d:#1f4d31;--on-terra:#fff;
+ --sea:#a9522a;--sea-d:#7e3b1e;--on-sea:#fff;--olive:var(--moss-2);--olive-d:var(--moss);--ok:var(--moss);--gold-d:#8a6012;
+ --f-d:"Fraunces",Georgia,serif;--f-b:"DM Sans",system-ui,-apple-system,"Segoe UI",sans-serif;--f-m:"DM Mono",ui-monospace,Menlo,monospace;
+ --sh-1:0 1px 2px rgba(31,38,29,.05),0 10px 24px -14px rgba(31,38,29,.22);--sh-2:0 2px 4px rgba(31,38,29,.06),0 18px 40px -16px rgba(31,38,29,.34);
+ --sh1:var(--sh-1);--sh2:0 1px 2px rgba(31,38,29,.06);color-scheme:light}
+body{font-family:var(--f-b);font-size:15px;line-height:1.5;letter-spacing:0;color:var(--ink);background:var(--paper)}
+.app{max-width:411px}
+h1,h2,h3,.hl{font-family:var(--f-d);font-weight:600;letter-spacing:-.025em}
+.hl{font-size:27px;line-height:1.16}
+.card-t{font:600 19px var(--f-d);letter-spacing:-.02em}
+.cap{font:500 11px var(--f-m);letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+.num,.kpi b,.pill,.lvl{font-family:var(--f-m);font-variant-numeric:tabular-nums}
+.head{background:color-mix(in srgb,var(--paper) 88%,transparent)}
+.lvl{width:50px;height:54px;border-radius:0;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:var(--gold);color:var(--ink);font-weight:500;font-size:18px;box-shadow:none}
+.who b{font:600 16px var(--f-d);letter-spacing:-.01em}
+.who .bar>i{background:var(--gold)}
+.bar{background:var(--line);height:8px}
+.pill{border:1px solid var(--line);background:var(--card);font-size:14px;font-weight:500}
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:18px;box-shadow:var(--sh-1);margin-top:12px}
+.card.featured{border-color:var(--gold);box-shadow:inset 0 0 0 1px var(--gold),var(--sh-1);background:linear-gradient(180deg,var(--gold-soft),var(--card) 70%)}
+.card.night{background:var(--night);border-color:var(--night-2);color:var(--moss-ink)}
+.btn{min-height:50px;border-radius:14px;font:700 15px var(--f-b);letter-spacing:0;background:var(--moss);color:#fff;border:0;box-shadow:inset 0 1px 0 rgba(255,255,255,.16),0 1px 2px rgba(31,38,29,.22)}
+.btn:active:not(:disabled){transform:scale(.98);filter:brightness(.95);box-shadow:none}
+.btn.gold{background:var(--gold);color:var(--ink)}
+.btn.sea{background:var(--sea);color:#fff;box-shadow:inset 0 1px 0 rgba(255,255,255,.16),0 1px 2px rgba(31,38,29,.22)}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line-2);box-shadow:none}
+.btn.sm{min-height:40px;padding:8px 14px;border-radius:12px;font-size:13.5px}
+.btn.sq{width:44px;min-height:44px;padding:0}
+.btn .ic,.chip .ic{width:18px;height:18px;flex:none}
+.chip{font:500 12.5px var(--f-b);background:color-mix(in srgb,var(--k) 12%,var(--card));border:1px solid color-mix(in srgb,var(--k) 45%,var(--card))}
+button.chip{cursor:pointer;min-height:38px;padding:6px 14px;background:var(--card);border:1px solid var(--line-2);color:var(--ink);font-size:13.5px}
+button.chip.on{background:var(--moss);color:#fff;border-color:var(--moss)}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:20px;box-shadow:var(--sh-1);padding:14px 6px}
+.kpi b{font:500 26px/1.1 var(--f-m);letter-spacing:-.03em}
+.kpi small{font:400 14px var(--f-m);color:var(--mute)}
+.kpi span{font:500 12px var(--f-b);color:var(--mute)}
+.kpi.is-empty{background:transparent;border:1.5px dashed var(--line-2);box-shadow:none}
+.kpi.is-empty b{color:var(--mute-2)}
+.empty-note{border:1.5px dashed var(--line-2);border-radius:20px;background:transparent;color:var(--mute);padding:18px}
+.empty-note::before{content:"";display:block;width:34px;height:34px;margin:0 auto 8px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237d8676' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 21v-8'/%3E%3Cpath d='M12 13c0-3.3-2.7-6-6-6 0 3.3 2.7 6 6 6z'/%3E%3Cpath d='M12 13c0-3.9 3.1-7 7-7 0 3.9-3.1 7-7 7z'/%3E%3C/svg%3E") center/contain no-repeat}
+input,select,textarea{background:#fff;border:1px solid var(--line-2);border-radius:14px;font:400 16px var(--f-b);min-height:48px}
+input:focus,select:focus,textarea:focus{border-color:var(--moss);box-shadow:0 0 0 4px color-mix(in srgb,var(--moss) 16%,transparent)}
+.f{font:500 13px var(--f-b);color:var(--ink-2)}
+.tabs{background:none;border:0;-webkit-backdrop-filter:none;backdrop-filter:none;pointer-events:none;padding:0 10px calc(10px + env(safe-area-inset-bottom,0px))}
+.tabs div{pointer-events:auto;max-width:391px;background:rgba(255,255,255,.94);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border:1px solid var(--line);border-radius:24px;padding:6px;box-shadow:var(--sh-2)}
+.tab{font:500 10.5px var(--f-b);letter-spacing:0;color:var(--mute);min-height:50px;border-radius:18px}
+.tab svg{stroke-width:1.7}
+.tab[aria-current="page"],:root .tab[aria-current="page"]{background:var(--moss);color:#fff}
+.stage,.stage.mini{background:var(--night);border:1px solid var(--night-2);box-shadow:var(--sh-1)}
+.hchip,.hud-bot{font-family:var(--f-b)}
+.trow,.step{border-top:1px solid var(--line)}
+.mtile{border:1px solid var(--line);border-radius:20px}
+.tone-warn{color:var(--gold-d)}
+.disc{color:var(--mute)}
+@media (prefers-reduced-motion: reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 </style>
 </head>
 <body>
@@ -872,12 +933,12 @@ const ICON={
  laurel:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg>'
 };
 const TABS=[
- ["today","Jour",'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><path d="M12 12l7-7"/>'],
- ["cite","Forêt",'<path d="M3 21h18M5 21V10l7-5 7 5v11M9 21v-6h6v6"/>'],
- ["repas","Repas",'<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>'],
- ["corps","Corps",'<rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 9a4 4 0 0 1 8 0M12 9l2.5-2.5"/>'],
- ["energie","Énergie",'<path d="M13 2L5 14h6l-1 8 8-12h-6z"/>'],
- ["otium","Loisirs",'<path d="M5 4h10a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3zM5 17a3 3 0 0 1 3-3h10"/>']
+ ["today","Jour",'<circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M18.4 5.6L17 7M7 17l-1.4 1.4"/>'],
+ ["cite","Forêt",'<path d="M12 3l4.5 6h-3l3.5 5H7l3.5-5h-3z"/><path d="M12 14v7"/><path d="M8 21h8"/>'],
+ ["repas","Repas",'<path d="M4 12h16a8 8 0 0 1-16 0z"/><path d="M3 12h18"/><path d="M8 8c0-1.5 1-2 1-3M12 8c0-1.5 1-2 1-3M16 8c0-1.5 1-2 1-3"/>'],
+ ["corps","Corps",'<circle cx="12" cy="5" r="2.4"/><path d="M12 7.6c-3 0-4.6 1.6-4.6 4.2 0 1.8.6 2.9.6 4.4L7 21h10l-1-4.8c0-1.5.6-2.6.6-4.4 0-2.6-1.6-4.2-4.6-4.2z"/>'],
+ ["energie","Énergie",'<path d="M13 2 5 13h6l-1 9 8-11h-6z"/>'],
+ ["otium","Loisirs",'<path d="M3 5.5A2.5 2.5 0 0 1 5.5 3H11v16H5.5A2.5 2.5 0 0 0 3 21.5z"/><path d="M21 5.5A2.5 2.5 0 0 0 18.5 3H13v16h5.5A2.5 2.5 0 0 1 21 21.5z"/>']
 ];
 let tab="today",lfilter="all";
 
@@ -973,10 +1034,12 @@ function vToday(){
   const plural=(k,w)=>k+' '+w+(k>1?'s':'');
   const head=first?'Bienvenue ! Commence par ton poids et tes mesures.':need>0?'Encore '+plural(need,'séance')+' à la salle cette semaine':gp.length?'Il te reste '+plural(gp.length,'objectif')+' à valider':'Tout est fait cette semaine. Bravo !';
   const hello='<div style="margin:4px 2px 14px"><div class="cap">'+fmt(today(),{weekday:"long",day:"numeric",month:"long"})+'</div><h1 class="hl">'+head+'</h1>'+(!first&&need>0?'<p class="small '+ss.tone+'" style="margin:6px 0 0;font-weight:700">'+ss.msg+'</p>':'')+'</div>';
-  const kpi=(v,u,t)=>'<div class="kpi"><b class="num">'+v+(u?'<small>'+u+'</small>':'')+'</b><span>'+t+'</span></div>';
-  const kpis='<div class="kpis">'+kpi(n,'/3','Séances')+kpi(S.goals.length?gd:'—',S.goals.length?'/'+S.goals.length:'','Objectifs')+kpi(nm?tk:'—',nm?' kcal':'','Repas du jour')+'</div>';
+  const kpi=(v,u,t,e)=>'<div class="kpi'+(e?' is-empty':'')+'"><b class="num">'+v+(u?'<small>'+u+'</small>':'')+'</b><span>'+t+'</span></div>';
+  const kpis='<div class="kpis">'+kpi(n,'/3','Séances')+kpi(S.goals.length?gd:'—',S.goals.length?'/'+S.goals.length:'','Objectifs',!S.goals.length)+kpi(nm?tk:'—',nm?' kcal':'','Repas du jour',!nm)+'</div>';
   const row=(t,sub,btn)=>'<div class="trow"><div class="grow"><b>'+t+'</b>'+(sub?'<div class="small mute">'+sub+'</div>':'')+'</div>'+btn+'</div>';
-  const start=first?'<section class="card flat" style="margin-top:14px;border-color:var(--gold)"><h2 style="font-size:20px">Ton point de départ</h2><p class="small" style="margin:6px 0 12px">Ton poids et tes mensurations servent de référence pour suivre ton évolution.</p><button class="btn block" data-act="bodyadd">Saisir mon poids et mes mesures</button></section>':'';
+  const start=first?'<section class="card featured" style="margin-top:12px"><h2 class="card-t">Ton point de départ</h2><p class="small" style="margin:6px 0 12px">Ton poids et tes mensurations servent de référence pour suivre ton évolution.</p><button class="btn block" data-act="bodyadd">Saisir mon poids et mes mesures</button></section>':'';
+  const lp=lastVal("poids"),fp=firstVal("poids"),npw=S.body.filter(b=>b.poids!=null).length;
+  const wsum=(!first&&lp!=null)?'<section class="card" style="margin-top:12px"><div class="row sp"><div><div class="cap">Ton poids</div><div class="num" style="font-size:28px;margin-top:2px">'+fn(lp)+' <span class="small mute" style="font-family:var(--f-b)">kg</span></div>'+(npw>1?'<div class="small mute">'+(lp-fp>0?'+':'')+fn(lp-fp)+' kg depuis le début</div>':'')+'</div><button class="btn ghost sm" data-act="bodyadd">Nouvelle mesure</button></div></section>':'';
   const todo=[];
   if(need>0)todo.push(row('Séance à la salle',n+' sur 3 cette semaine','<button class="btn sm" data-act="sport">Séance faite</button>'));
   if(!mOk&&!first)todo.push(row('Pesée de la semaine','Une fois par semaine','<button class="btn sm" data-act="bodyadd">Saisir</button>'));
@@ -994,7 +1057,7 @@ function vToday(){
   const bd=S.comp.reduce((a,c)=>a+c.d,0);
   const comp=secOpen.bonus?S.comp.map(g=>'<div class="trow"><div class="grow"><b>'+esc(g.t)+'</b><div class="small mute">'+g.d+' sur '+g.n+' cette semaine</div></div><div class="row" style="gap:8px"><button class="btn ghost sm" data-act="cminus" data-a="'+g.id+'" aria-label="Retirer un">−</button><button class="btn sm" data-act="cplus" data-a="'+g.id+'"'+(g.d>=g.n?' disabled':'')+'>+1</button></div></div>').join(""):'';
   const bonus='<section class="card"><button class="secbtn" data-act="sec" data-a="bonus" aria-expanded="'+!!secOpen.bonus+'"><span class="cap">Bonus (hors semaine parfaite) · '+bd+' fait'+(bd>1?'s':'')+'</span><span aria-hidden="true">'+(secOpen.bonus?'▴':'▾')+'</span></button>'+comp+'</section>';
-  return hello+kpis+start+(first?'':todoCard)+goalsCard+'<div style="margin-top:14px">'+mini+'</div>'+bonus;
+  return hello+kpis+wsum+start+(first?'':todoCard)+goalsCard+'<div style="margin-top:14px">'+mini+'</div>'+bonus;
 }
 function vCite(){
   initC3();
@@ -1048,12 +1111,12 @@ function vCrav(){
   const wk=monday(),list=S.cravings.filter(c=>c.date>=wk),st=cravStats(list);
   const sum=list.length?'<div class="small" style="margin:8px 0"><b>'+st.n+'</b> cette semaine'+(st.k?' · environ <b>'+st.k+'</b> kcal':'')+(st.emo.length?'<br>Émotions : '+st.emo.slice(0,3).map(e=>esc(e[0])).join(", "):'')+(st.slot[0]?'<br>Surtout : '+esc(st.slot[0][0].toLowerCase()):'')+'</div>':'<div class="empty-note">Rien de noté cette semaine. Si une envie arrive, tu peux la dire ici, sans jugement.</div>';
   const last=S.cravings.slice().sort((a,b)=>(b.date+b.time).localeCompare(a.date+a.time)).slice(0,2).map(c=>'<div class="item"><div class="grow"><b>'+esc(c.nom)+'</b><div class="small mute">'+fmt(c.date,{day:"numeric",month:"short"})+' · '+esc(c.time)+(c.emo&&c.emo.length?' · '+esc(c.emo.join(", ")):'')+'</div></div><div style="text-align:right">'+(c.kcal?'<b class="num">'+Math.round(c.kcal)+'</b><div class="small mute">kcal</div>':'')+'<button class="x" data-act="cravdel" data-a="'+c.id+'">Retirer</button></div></div>').join("");
-  return '<section class="card"><div class="cap">Craquages et envies hors repas</div><p class="small mute" style="margin:4px 0 0">Noter ce qui s\'est passé et ce que tu ressentais aide à repérer les déclencheurs. Ça apparaît dans le bilan pour ton professionnel de santé.</p>'+sum+last+'<button class="btn ghost block" style="margin-top:10px" data-act="cravnew">🎤 Noter un craquage</button></section>';
+  return '<section class="card"><div class="cap">Craquages et envies hors repas</div><p class="small mute" style="margin:4px 0 0">Noter ce qui s\'est passé et ce que tu ressentais aide à repérer les déclencheurs. Ça apparaît dans le bilan pour ton professionnel de santé.</p>'+sum+last+'<button class="btn ghost block" style="margin-top:10px" data-act="cravnew">'+I_MIC+'Noter un craquage</button></section>';
 }
 function sheetCrav(){
   window.__emo=[];
-  const chips=EMOS.map(e=>'<button type="button" class="chip" data-act="emo" data-a="'+e+'" style="cursor:pointer;border:2px solid var(--line)">'+e+'</button>').join(" ");
-  openSheet("Noter un craquage",'<div class="form"><p class="small mute" style="margin:0">Dis ce que tu as mangé et ce que tu ressentais, par exemple : « j\'ai mangé des biscuits devant la télé, j\'étais stressée après le travail ». Aucun jugement, c\'est juste pour mieux comprendre.</p>'+(SR?'<button class="btn sea block" id="vmic" data-act="voicego">🎤 Parler</button>':'')+'<label class="f">Ce qui s\'est passé<textarea id="v_txt" rows="4" maxlength="500" placeholder="Ce que j\'ai mangé, et pourquoi"></textarea></label>'+(engine()?'<button class="btn block" data-act="cravai">Laisser Mistral remplir (aliments, calories, émotions)</button>':'')+'<div id="c_info"></div><div><div class="f" style="font-weight:700;font-size:13px;margin-bottom:6px">Émotions (une ou plusieurs)</div><div style="display:flex;flex-wrap:wrap;gap:6px" id="emos">'+chips+'</div></div><label class="f">Aliments<input id="c_nom" maxlength="80" placeholder="Ex. biscuits, chocolat"></label><label class="f">Calories estimées (kcal, facultatif)<input id="c_kcal" inputmode="decimal"></label><button class="btn block" data-act="cravsave">Enregistrer</button></div>');
+  const chips=EMOS.map(e=>'<button type="button" class="chip" data-act="emo" data-a="'+e+'">'+e+'</button>').join(" ");
+  openSheet("Noter un craquage",'<div class="form"><p class="small mute" style="margin:0">Dis ce que tu as mangé et ce que tu ressentais, par exemple : « j\'ai mangé des biscuits devant la télé, j\'étais stressée après le travail ». Aucun jugement, c\'est juste pour mieux comprendre.</p>'+(SR?'<button class="btn sea block" id="vmic" data-act="voicego">'+I_MIC+'Parler</button>':'')+'<label class="f">Ce qui s\'est passé<textarea id="v_txt" rows="4" maxlength="500" placeholder="Ce que j\'ai mangé, et pourquoi"></textarea></label>'+(engine()?'<button class="btn block" data-act="cravai">Laisser Mistral remplir (aliments, calories, émotions)</button>':'')+'<div id="c_info"></div><div><div class="f" style="font-weight:700;font-size:13px;margin-bottom:6px">Émotions (une ou plusieurs)</div><div style="display:flex;flex-wrap:wrap;gap:6px" id="emos">'+chips+'</div></div><label class="f">Aliments<input id="c_nom" maxlength="80" placeholder="Ex. biscuits, chocolat"></label><label class="f">Calories estimées (kcal, facultatif)<input id="c_kcal" inputmode="decimal"></label><button class="btn block" data-act="cravsave">Enregistrer</button></div>');
 }
 function emoPaint(){document.querySelectorAll("#emos [data-a]").forEach(b=>{const on=window.__emo.includes(b.dataset.a);b.style.background=on?"var(--leaf, #2E8C50)":"";b.style.color=on?"#fff":"";b.style.borderColor=on?"transparent":"var(--line)"})}
 async function cravAI(){
@@ -1159,7 +1222,7 @@ function stars(n){let s="";for(let i=1;i<=5;i++)s+=i<=n?"★":"☆";return s}
 function vOtium(){
   const list=S.leisure.filter(x=>lfilter==="all"||x.kind===lfilter).slice().reverse();
   const wk=S.leisure.filter(x=>x.status==="fini"&&x.date>=S.weekKey).length;
-  const seg=[["all","Tout"]].concat(Object.keys(KINDS).map(k=>[k,KINDS[k]+"s"])).map(s=>'<button class="btn sm '+(lfilter===s[0]?'sea':'ghost')+'" data-act="lfilter" data-a="'+s[0]+'">'+s[1]+'</button>').join("");
+  const seg=[["all","Tout"]].concat(Object.keys(KINDS).map(k=>[k,KINDS[k]+"s"])).map(s=> '<button class="chip'+(lfilter===s[0]?' on':'')+'" data-act="lfilter" data-a="'+s[0]+'">'+s[1]+'</button>').join("");
   return '<section class="card flat"><div class="cap">Livres, musique, films, séries</div><div class="row sp" style="margin-top:4px"><h2 style="font-size:18px">'+wk+' terminé'+(wk>1?'s':'')+' cette semaine</h2><button class="btn" data-act="leisureadd">Ajouter</button></div></section>'+
    '<div class="seg" style="margin-top:14px">'+seg+'</div>'+
    '<section class="card" style="margin-top:6px">'+(list.length?list.map(x=>'<div class="item"><div class="grow"><div class="row" style="gap:8px;flex-wrap:wrap"><span class="chip k-'+x.kind+'">'+KINDS[x.kind]+'</span><span class="small mute">'+fmt(x.date)+'</span></div><h4 style="margin-top:6px">'+esc(x.title)+'</h4>'+(x.rating?'<div style="color:var(--gold-d);letter-spacing:2px" aria-label="'+x.rating+' sur 5">'+stars(x.rating)+'</div>':'')+(x.note?'<div class="small mute" style="margin-top:2px">'+esc(x.note)+'</div>':'')+'<button class="x" data-act="leisuredel" data-a="'+x.id+'" style="padding-left:0">Supprimer</button></div>'+(x.status==="cours"?'<button class="btn sm sea" data-act="leisurefin" data-a="'+x.id+'">Terminé</button>':'<span class="chip" style="--k:var(--olive)">Terminé</span>')+'</div>').join(""):'<div class="empty-note">Rien ici pour l\'instant. Note le livre que tu lis, la musique du moment, le film de ce soir.</div>')+'</section>';
@@ -1193,14 +1256,14 @@ function sheetSport(){
 }
 function sheetGoal(id){
   const g=S.goals.find(x=>x.id===id);
-  openSheet(g?"Modifier l'objectif":"Objectif de la semaine",'<div class="form">'+(SR?'<button class="btn sea block" id="vmic" data-act="voicego">🎤 Dicter</button>':'')+'<label class="f">Mon objectif (écris ce que tu veux)<textarea id="gt" rows="3" maxlength="140" placeholder="Avec tes mots">'+esc(g?g.t:"")+'</textarea></label><button class="btn block" data-act="goalsave" data-a="'+(id||"")+'">'+(g?"Enregistrer":"Ajouter l'objectif")+'</button>'+(g?'<button class="btn ghost block" data-act="goaldel" data-a="'+id+'">Supprimer cet objectif</button>':'')+'</div>');
+  openSheet(g?"Modifier l'objectif":"Objectif de la semaine",'<div class="form">'+(SR?'<button class="btn sea block" id="vmic" data-act="voicego">'+I_MIC+'Dicter</button>':'')+'<label class="f">Mon objectif (écris ce que tu veux)<textarea id="gt" rows="3" maxlength="140" placeholder="Avec tes mots">'+esc(g?g.t:"")+'</textarea></label><button class="btn block" data-act="goalsave" data-a="'+(id||"")+'">'+(g?"Enregistrer":"Ajouter l'objectif · +6 XP")+'</button>'+(g?'<button class="btn ghost block" data-act="goaldel" data-a="'+id+'">Supprimer cet objectif</button>':'')+'</div>');
 }
 function sheetBody(){
   const f=(id,l,k)=>'<label class="f">'+l+'<input id="'+id+'" inputmode="decimal" placeholder="—" value="'+(lastVal(k)!=null?fn(lastVal(k)):"")+'"></label>';
-  openSheet("Nouvelle mesure",'<div class="form"><label class="f">Date<input id="b_date" type="date" value="'+today()+'" max="'+today()+'"></label><div class="two">'+f("b_poids","Poids (kg)","poids")+f("b_taille","Taille (cm)","taille")+'</div><div class="two">'+f("b_ventre","Tour de taille (cm)","ventre")+f("b_hanches","Hanches (cm)","hanches")+'</div><div class="two">'+f("b_poitrine","Poitrine (cm)","poitrine")+f("b_bras","Bras (cm)","bras")+'</div>'+f("b_cuisse","Cuisse (cm)","cuisse")+'<button class="btn block" data-act="bodysave">Enregistrer · +10 XP</button></div>');
+  openSheet("Nouvelle mesure",'<div class="form"><label class="f">Date<input id="b_date" type="date" value="'+today()+'" max="'+today()+'"></label><div class="two">'+f("b_poids","Poids (kg)","poids")+f("b_taille","Taille (cm)","taille")+'</div><div class="two">'+f("b_ventre","Tour de taille (cm)","ventre")+f("b_hanches","Hanches (cm)","hanches")+'</div><div class="two">'+f("b_poitrine","Poitrine (cm)","poitrine")+f("b_bras","Bras (cm)","bras")+'</div>'+f("b_cuisse","Cuisse (cm)","cuisse")+'<button class="btn block" data-act="bodysave">Enregistrer · +10 XP</button><button class="btn ghost block" data-act="close">Annuler</button></div>');
 }
 function sheetMealAdd(){
-  openSheet("Ajouter un repas",'<div class="form">'+(engine()?'<label class="btn block" for="photo">📷 Prendre en photo</label><input id="photo" type="file" accept="image/*" capture="environment" hidden><label class="btn sea block" for="photo2">🖼 Choisir une photo</label><input id="photo2" type="file" accept="image/*" hidden>':'<button class="btn block" data-act="mkey">Activer l\'analyse photo (gratuit)</button>')+'<button class="btn block" data-act="mealvoice">🎤 Dire mon repas</button><button class="btn ghost block" data-act="mealmanual">Saisir à la main</button></div>');
+  openSheet("Ajouter un repas",'<div class="form">'+(engine()?'<label class="btn block" for="photo">'+I_CAM+'Prendre en photo</label><input id="photo" type="file" accept="image/*" capture="environment" hidden><label class="btn sea block" for="photo2">'+I_IMG+'Choisir une photo</label><input id="photo2" type="file" accept="image/*" hidden>':'<button class="btn block" data-act="mkey">Activer l\'analyse photo (gratuit)</button>')+'<button class="btn block" data-act="mealvoice">'+I_MIC+'Dire mon repas</button><button class="btn ghost block" data-act="mealmanual">Saisir à la main</button></div>');
 }
 function sheetMealForm(m,info){
   m=m||{nom:"",kcal:"",p:"",g:"",l:"",f:""};
@@ -1304,9 +1367,11 @@ async function analyseMeal(file){
     sheetMealForm(null,'<p class="small tone-bad" style="font-weight:700">'+((e&&MERR[e.code])||copyFor(e&&e.code))+(e&&e.status?' <span class="mute">(Mistral '+e.status+(e.detail?' : '+esc(e.detail):'')+')</span>':'')+' Tu peux saisir le repas à la main.</p>');
   }
 }
+const IC0='<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">';
+const I_MIC=IC0+'<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>',I_CAM=IC0+'<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>',I_IMG=IC0+'<rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="1.6"/><path d="M21 16l-5-5-8 9"/></svg>';
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition;let rec=null,recOn=false;
 function sheetVoice(){
-  openSheet("Dire mon repas",'<div class="form"><p class="small mute" style="margin:0">Appuie sur le micro et dis ce que tu as mangé, avec les quantités si tu les connais. Ex. : « deux œufs brouillés, une tranche de pain complet et un café ». Tu peux corriger le texte avant de lancer.</p>'+(SR?'<button class="btn sea block" id="vmic" data-act="voicego">🎤 Parler</button>':'<p class="small mute" style="margin:0">Dictée non disponible ici : utilise le micro du clavier de ton téléphone.</p>')+'<label class="f">Ce que j\'ai mangé<textarea id="v_txt" rows="4" maxlength="500" placeholder="Ex. un bol de skyr, une banane et des amandes"></textarea></label><button class="btn block" data-act="voiceok">Estimer les calories et les macros</button></div>');
+  openSheet("Dire mon repas",'<div class="form"><p class="small mute" style="margin:0">Appuie sur le micro et dis ce que tu as mangé, avec les quantités si tu les connais. Ex. : « deux œufs brouillés, une tranche de pain complet et un café ». Tu peux corriger le texte avant de lancer.</p>'+(SR?'<button class="btn sea block" id="vmic" data-act="voicego">'+I_MIC+'Parler</button>':'<p class="small mute" style="margin:0">Dictée non disponible ici : utilise le micro du clavier de ton téléphone.</p>')+'<label class="f">Ce que j\'ai mangé<textarea id="v_txt" rows="4" maxlength="500" placeholder="Ex. un bol de skyr, une banane et des amandes"></textarea></label><button class="btn block" data-act="voiceok">Estimer les calories et les macros</button></div>');
 }
 function voiceToggle(){
   const b=document.getElementById("vmic"),t=document.getElementById("v_txt")||document.getElementById("gt");if(!SR||!t)return;
@@ -1315,8 +1380,8 @@ function voiceToggle(){
   const base=t.value?t.value.trim()+" ":"";
   rec.onstart=()=>{recOn=true;if(b)b.textContent="⏹ J'écoute… (toucher pour arrêter)"};
   rec.onresult=ev=>{let x="";for(let i=0;i<ev.results.length;i++)x+=ev.results[i][0].transcript;t.value=base+x};
-  rec.onerror=ev=>{recOn=false;if(b)b.textContent="🎤 Parler";if(ev&&(ev.error==="not-allowed"||ev.error==="service-not-allowed"))toast("Micro refusé : autorise-le dans les réglages du navigateur.")};
-  rec.onend=()=>{recOn=false;const bb=document.getElementById("vmic");if(bb)bb.textContent="🎤 Parler"};
+  rec.onerror=ev=>{recOn=false;if(b)b.innerHTML=I_MIC+" Parler";if(ev&&(ev.error==="not-allowed"||ev.error==="service-not-allowed"))toast("Micro refusé : autorise-le dans les réglages du navigateur.")};
+  rec.onend=()=>{recOn=false;const bb=document.getElementById("vmic");if(bb)bb.innerHTML=I_MIC+" Parler"};
   try{rec.start()}catch(e){recOn=false}
 }
 async function analyseText(){
@@ -1412,7 +1477,7 @@ async function syncPull(){
 }
 async function syncPush(){await pushRemote();closeSheet();render();toast(rs.st==="ok"?"Synchronisation activée":"Serveur injoignable")}
 function sheetWelcome(){
-  openSheet("Bienvenue dans ta clairière",'<div style="display:grid;gap:12px"><p style="margin:0">Une petite île t\'attend. Elle grandit avec toi.</p><p style="margin:0"><b>Va à la salle 3 fois par semaine.</b> Chaque séance te rapporte des glands pour aménager la forêt. Si tu en rates, un orage abîme tes aménagements.</p><p style="margin:0"><b>Commence par ton poids et tes mesures</b>, puis valide tes objectifs et note tes repas : chaque geste fait monter ton niveau et agrandit l\'île.</p><button class="btn block" data-act="welcome" data-a="goals">Choisir mes objectifs</button><button class="btn ghost block" data-act="welcome">Commencer</button></div>');
+  openSheet("Bienvenue dans ta clairière",'<div style="display:grid;gap:12px"><p style="margin:0">Une petite île t\'attend. Elle grandit avec toi : chaque pas, chaque repas noté, chaque objectif tenu lui donne de la lumière.</p><button class="btn gold block" data-act="welcome" data-a="goals">Choisir mes objectifs</button><button class="btn ghost block" data-act="welcome">Commencer</button></div>');
 }
 /* rappel de sauvegarde hebdomadaire */
 function backupDue(){
@@ -1503,7 +1568,7 @@ function act(a,x,y,el){
   case "gres":{const g=S.goals.find(q=>q.id===x);if(g){g.s=0;persist();render()}break}
   case "goaledit":sheetGoal(x);break;
   case "goalsave":{const t=val("gt").trim();if(!t){toast("Donne un nom à l'objectif");return}
-    if(x){const g=S.goals.find(q=>q.id===x);g.t=t}else if(S.goals.length>=3){toast("3 objectifs perso maximum");return}else S.goals.push({id:"g"+uid(),t:t,s:0,p:0});
+    if(x){const g=S.goals.find(q=>q.id===x);g.t=t}else if(S.goals.length>=3){toast("3 objectifs perso maximum");return}else{S.goals.push({id:"g"+uid(),t:t,s:0,p:0});gain(6,0,0,"Objectif ajouté.")}
     persist();closeSheet();render();break}
   case "goaldel":S.goals=S.goals.filter(q=>q.id!==x);persist();closeSheet();render();break;
   case "mealmanual":sheetMealForm();break;
@@ -1516,7 +1581,7 @@ function act(a,x,y,el){
   case "qdel":S.bilans=S.bilans.filter(b=>b.id!==x);persist();render();break;
   case "sec":secOpen[x]=!secOpen[x];render();break;
   case "mealadd":sheetMealAdd();break;
-  case "goalquick":{const t=val("gq").trim();if(!t){toast("Écris ton objectif");return}if(S.goals.length>=3){toast("3 objectifs maximum");return}S.goals.push({id:"g"+uid(),t:t,s:0,p:0});persist();render();break}
+  case "goalquick":{const t=val("gq").trim();if(!t){toast("Écris ton objectif");return}if(S.goals.length>=3){toast("3 objectifs maximum");return}S.goals.push({id:"g"+uid(),t:t,s:0,p:0});gain(6,0,0,"Objectif ajouté.");persist();render();break}
   case "cravnew":sheetCrav();break;
   case "emo":{const i=window.__emo.indexOf(x);if(i>=0)window.__emo.splice(i,1);else window.__emo.push(x);emoPaint();break}
   case "cravai":cravAI();break;
