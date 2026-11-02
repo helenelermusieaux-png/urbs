@@ -353,6 +353,13 @@ input:focus,select:focus,textarea:focus{border-color:var(--moss);box-shadow:0 0 
 .tone-warn{color:var(--gold-d)}
 .disc{color:var(--mute)}
 @media (prefers-reduced-motion: reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+.sv{display:inline-block;transition:filter .2s}div.sv,h2.sv,svg.sv{display:block}
+.hide-nums .sv{filter:blur(9px);user-select:none;-webkit-user-select:none;pointer-events:none}
+.hide-nums .avv{opacity:0}
+.eye{flex:none;width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--mute);display:grid;place-items:center;cursor:pointer;padding:0}
+.eye svg{width:20px;height:20px}
+.eye[aria-pressed="true"]{background:var(--moss);color:#fff;border-color:var(--moss)}
 </style>
 
 <div class="app">
@@ -930,13 +937,16 @@ function renderHead(){
   const l=lvlOf(S.xp),a=60*(l-1)*(l-1),b=60*l*l,p=Math.max(0,Math.min(100,(S.xp-a)/(b-a)*100));
   $("#head").innerHTML='<div class="lvl num" aria-label="Niveau '+l+'">'+l+'</div>'+
    '<div class="who"><b>'+rank(l)+'</b><div class="bar sea" role="progressbar" aria-label="Expérience" aria-valuenow="'+Math.round(p)+'" aria-valuemin="0" aria-valuemax="100"><i style="width:'+p+'%"></i></div></div>'+
+   '<button class="eye" data-act="hide" aria-pressed="'+hideOn()+'" aria-label="'+(hideOn()?'Afficher mes chiffres':'Masquer mes chiffres')+'" title="Mode discret">'+(hideOn()?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l18 18"/><path d="M10.6 5.1A9.7 9.7 0 0 1 12 5c5.5 0 9 7 9 7a15 15 0 0 1-3 3.7M6.6 6.6A15 15 0 0 0 3 12s3.5 7 9 7a9.4 9.4 0 0 0 4-.9"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12s3.5-7 9-7 9 7 9 7-3.5 7-9 7-9-7-9-7z"/><circle cx="12" cy="12" r="3"/></svg>')+'</button>'+
    '<div class="pill num" title="Glands">'+ICON.den+S.den+'</div>';
 }
+const hideOn=()=>!!(S.opts&&S.opts.hide);
 function renderTabs(){
   const todo=S.sport.length<3||S.goals.some(g=>!g.s);
   $("#tabs").innerHTML=TABS.filter(t=>t[0]!=="energie"||optOn()).map(t=>'<button class="tab" data-act="tab" data-a="'+t[0]+'"'+(tab===t[0]?' aria-current="page"':'')+'><svg viewBox="0 0 24 24" aria-hidden="true">'+t[2]+'</svg>'+t[1]+((t[0]==="today"&&todo&&tab!=="today")||(t[0]==="energie"&&energyDue()&&tab!=="energie")?'<span class="dot" aria-label="À faire"></span>':'')+'</button>').join("");
 }
 function render(){
+  document.body.classList.toggle("hide-nums",hideOn());
   renderHead();renderTabs();
   $("#view").innerHTML=({today:vToday,cite:vCite,repas:vRepas,corps:vCorps,energie:vEnergie,otium:vOtium})[(tab==="energie"&&!optOn())?"today":tab]();
   const slot=document.getElementById("c3slot");
@@ -977,16 +987,16 @@ function qChart(k){
   const q=QS[k],pts=bilKind(k).slice(-8);if(!pts.length)return "";
   const W=300,H=64,x=i=>pts.length===1?W/2:10+i*(W-20)/(pts.length-1),y=v=>H-8-(v-q.min)/(q.max-q.min)*(H-16);
   const col=q.better==="low"?"var(--terra)":"var(--olive,#2E8C50)";
-  return '<svg viewBox="0 0 '+W+' '+H+'" width="100%" height="64" role="img" aria-label="Évolution des scores" style="margin-top:8px"><polyline fill="none" stroke="'+col+'" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" points="'+pts.map((b,i)=>x(i)+','+y(b.score)).join(' ')+'"/>'+pts.map((b,i)=>'<circle cx="'+x(i)+'" cy="'+y(b.score)+'" r="4.5" fill="'+col+'"/>').join("")+'</svg>';
+  return '<svg class="sv" viewBox="0 0 '+W+' '+H+'" width="100%" height="64" role="img" aria-label="Évolution des scores" style="margin-top:8px"><polyline fill="none" stroke="'+col+'" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" points="'+pts.map((b,i)=>x(i)+','+y(b.score)).join(' ')+'"/>'+pts.map((b,i)=>'<circle cx="'+x(i)+'" cy="'+y(b.score)+'" r="4.5" fill="'+col+'"/>').join("")+'</svg>';
 }
 function vEnergie(){
   const card=k=>{
     const q=QS[k],h=bilKind(k),l=h[h.length-1],pv=h[h.length-2],nx=bilNext(k),due=!nx||today()>=nx;
-    let dl="";if(l&&pv){const d=l.score-pv.score,good=q.better==="low"?d<0:d>0;dl='<span class="small '+(d===0?'mute':good?'tone-ok':'tone-warn')+'" style="font-weight:700">'+(d>0?"+":"")+d+' depuis le dernier bilan</span>'}
+    let dl="";if(l&&pv){const d=l.score-pv.score,good=q.better==="low"?d<0:d>0;dl='<span class="sv small '+(d===0?'mute':good?'tone-ok':'tone-warn')+'" style="font-weight:700">'+(d>0?"+":"")+d+' depuis le dernier bilan</span>'}
     const it=l?q.interp(l.score):null;
-    const hist=h.slice().reverse().slice(0,6).map(b=>'<div class="item"><div class="grow"><b>'+fmt(b.date,{day:"numeric",month:"long",year:"numeric"})+'</b><div class="small mute">'+esc(q.interp(b.score).t)+'</div></div><b class="num">'+b.score+' / '+q.max+'</b><button class="x" data-act="qdel" data-a="'+b.id+'">Retirer</button></div>').join("");
+    const hist=h.slice().reverse().slice(0,6).map(b=>'<div class="item"><div class="grow"><b>'+fmt(b.date,{day:"numeric",month:"long",year:"numeric"})+'</b><div class="small mute">'+esc(q.interp(b.score).t)+'</div></div><b class="num sv">'+b.score+' / '+q.max+'</b><button class="x" data-act="qdel" data-a="'+b.id+'">Retirer</button></div>').join("");
     return '<section class="card"><div class="cap">'+esc(q.titre)+'</div>'+
-     (l?'<div class="row sp" style="margin-top:6px;align-items:flex-end"><h2 class="num" style="font-size:30px">'+l.score+' <span class="small mute" style="font-family:var(--f-b);font-weight:700">sur '+q.max+'</span></h2><span class="chip">'+esc(it.t)+'</span></div>'+(dl?'<div style="margin-top:2px">'+dl+'</div>':''):'<div class="empty-note">Pas encore de bilan. Fais-le une première fois pour avoir ton point de départ.</div>')+
+     (l?'<div class="row sp" style="margin-top:6px;align-items:flex-end"><h2 class="num sv" style="font-size:30px">'+l.score+' <span class="small mute" style="font-family:var(--f-b);font-weight:700">sur '+q.max+'</span></h2><span class="chip">'+esc(it.t)+'</span></div>'+(dl?'<div style="margin-top:2px">'+dl+'</div>':''):'<div class="empty-note">Pas encore de bilan. Fais-le une première fois pour avoir ton point de départ.</div>')+
      qChart(k)+
      '<p class="small '+(due?'tone-warn':'mute')+'" style="margin:8px 0 10px;font-weight:700">'+(due?(l?'Un nouveau bilan est conseillé.':'À faire maintenant.'):'Prochain bilan conseillé le '+fmt(nx,{day:"numeric",month:"long"})+'.')+'</p>'+
      '<button class="btn'+(due?'':' ghost')+' block" data-act="qstart" data-a="'+k+'">'+(l?'Refaire le bilan':'Faire le bilan')+'</button>'+
@@ -1018,12 +1028,12 @@ function vToday(){
   const plural=(k,w)=>k+' '+w+(k>1?'s':'');
   const head=first?'Bienvenue ! Commence par ton poids et tes mesures.':need>0?'Encore '+plural(need,'séance')+' à la salle cette semaine':gp.length?'Il te reste '+plural(gp.length,'objectif')+' à valider':'Tout est fait cette semaine. Bravo !';
   const hello='<div style="margin:4px 2px 14px"><div class="cap">'+fmt(today(),{weekday:"long",day:"numeric",month:"long"})+'</div><h1 class="hl">'+head+'</h1>'+(!first&&need>0?'<p class="small '+ss.tone+'" style="margin:6px 0 0;font-weight:700">'+ss.msg+'</p>':'')+'</div>';
-  const kpi=(v,u,t,e)=>'<div class="kpi'+(e?' is-empty':'')+'"><b class="num">'+v+(u?'<small>'+u+'</small>':'')+'</b><span>'+t+'</span></div>';
-  const kpis='<div class="kpis">'+kpi(n,'/3','Séances')+kpi(S.goals.length?gd:'—',S.goals.length?'/'+S.goals.length:'','Objectifs',!S.goals.length)+kpi(nm?tk:'—',nm?' kcal':'','Repas du jour',!nm)+'</div>';
+  const kpi=(v,u,t,e,sv)=>'<div class="kpi'+(e?' is-empty':'')+'"><b class="num'+(sv?' sv':'')+'">'+v+(u?'<small>'+u+'</small>':'')+'</b><span>'+t+'</span></div>';
+  const kpis='<div class="kpis">'+kpi(n,'/3','Séances')+kpi(S.goals.length?gd:'—',S.goals.length?'/'+S.goals.length:'','Objectifs',!S.goals.length)+kpi(nm?tk:'—',nm?' kcal':'','Repas du jour',!nm,true)+'</div>';
   const row=(t,sub,btn)=>'<div class="trow"><div class="grow"><b>'+t+'</b>'+(sub?'<div class="small mute">'+sub+'</div>':'')+'</div>'+btn+'</div>';
   const start=first?'<section class="card featured" style="margin-top:12px"><h2 class="card-t">Ton point de départ</h2><p class="small" style="margin:6px 0 12px">Ton poids et tes mensurations servent de référence pour suivre ton évolution.</p><button class="btn block" data-act="bodyadd">Saisir mon poids et mes mesures</button></section>':'';
   const lp=lastVal("poids"),fp=firstVal("poids"),npw=S.body.filter(b=>b.poids!=null).length;
-  const wsum=(!first&&lp!=null)?'<section class="card" style="margin-top:12px"><div class="row sp"><div><div class="cap">Ton poids</div><div class="num" style="font-size:28px;margin-top:2px">'+fn(lp)+' <span class="small mute" style="font-family:var(--f-b)">kg</span></div>'+(npw>1?'<div class="small mute">'+(lp-fp>0?'+':'')+fn(lp-fp)+' kg depuis le début</div>':'')+'</div><button class="btn ghost sm" data-act="bodyadd">Nouvelle mesure</button></div></section>':'';
+  const wsum=(!first&&lp!=null)?'<section class="card" style="margin-top:12px"><div class="row sp"><div><div class="cap">Ton poids</div><div class="num sv" style="font-size:28px;margin-top:2px">'+fn(lp)+' <span class="small mute" style="font-family:var(--f-b)">kg</span></div>'+(npw>1?'<div class="small mute sv">'+(lp-fp>0?'+':'')+fn(lp-fp)+' kg depuis le début</div>':'')+'</div><button class="btn ghost sm" data-act="bodyadd">Nouvelle mesure</button></div></section>':'';
   const todo=[];
   if(need>0)todo.push(row('Séance à la salle',n+' sur 3 cette semaine','<button class="btn sm" data-act="sport">Séance faite</button>'));
   if(!mOk&&!first)todo.push(row('Pesée de la semaine','Une fois par semaine','<button class="btn sm" data-act="bodyadd">Saisir</button>'));
@@ -1082,19 +1092,19 @@ function vRepas(){
   const td=dayMeals(today()),t=sumM(td);
   const eng=engine(),photo=!!eng;
   const days=[];for(let i=1;i<=6;i++){const d=addDays(today(),-i),ms=dayMeals(d);if(ms.length)days.push([d,ms.length,sumM(ms).k])}
-  return '<section class="card flat"><div class="cap">Aujourd\'hui</div><div class="row sp" style="margin-top:4px"><h2 class="num" style="font-size:26px">'+Math.round(t.k)+' <span class="small mute" style="font-family:var(--f-b);font-weight:700">kcal</span></h2><span class="small mute">'+td.length+' repas'+'</span></div>'+
-   '<div class="macros num"><div><b>'+Math.round(t.p)+'</b><span>Protéines g</span></div><div><b>'+Math.round(t.g)+'</b><span>Glucides g</span></div><div><b>'+Math.round(t.l)+'</b><span>Lipides g</span></div><div><b>'+Math.round(t.f)+'</b><span>Fibres g</span></div></div></section>'+
+  return '<section class="card flat"><div class="cap">Aujourd\'hui</div><div class="row sp" style="margin-top:4px"><h2 class="num sv" style="font-size:26px">'+Math.round(t.k)+' <span class="small mute" style="font-family:var(--f-b);font-weight:700">kcal</span></h2><span class="small mute">'+td.length+' repas'+'</span></div>'+
+   '<div class="macros num sv"><div><b>'+Math.round(t.p)+'</b><span>Protéines g</span></div><div><b>'+Math.round(t.g)+'</b><span>Glucides g</span></div><div><b>'+Math.round(t.l)+'</b><span>Lipides g</span></div><div><b>'+Math.round(t.f)+'</b><span>Fibres g</span></div></div></section>'+
    '<button class="btn block" style="margin-top:14px" data-act="mealadd">Ajouter un repas</button>'+
    (eng==="mistral"?'<p class="disc">Analyse par Mistral (gratuit). <button class="x" data-act="mkey">Clé API</button></p>':!photo?'<p class="disc">Analyse gratuite par photo avec Mistral : une clé API gratuite suffit.</p>':'')+
    '<section class="card"><div class="cap">Repas du jour</div>'+(td.length?td.map(mealItem).join(""):'<div class="empty-note">Pas encore de repas aujourd\'hui. Prends ton assiette en photo : j\'estime les calories et les macros.</div>')+'</section>'+vCrav()+
-   (days.length?'<section class="card"><div class="cap">Jours précédents</div>'+days.map(d=>'<div class="item"><div class="grow"><b>'+fmt(d[0],{weekday:"long",day:"numeric",month:"short"})+'</b><div class="small mute">'+d[1]+' repas</div></div><b class="num">'+Math.round(d[2])+' kcal</b></div>').join("")+'</section>':'')+
+   (days.length?'<section class="card"><div class="cap">Jours précédents</div>'+days.map(d=>'<div class="item"><div class="grow"><b>'+fmt(d[0],{weekday:"long",day:"numeric",month:"short"})+'</b><div class="small mute">'+d[1]+' repas</div></div><b class="num sv">'+Math.round(d[2])+' kcal</b></div>').join("")+'</section>':'')+
    '<button class="btn sea block" style="margin-top:14px" data-act="export">Exporter le bilan pour un professionnel de santé</button>'+
    '<p class="disc">Calories et nutriments estimés par IA à partir d\'une photo : ce sont des ordres de grandeur, à valider avec ton professionnel de santé.</p>';
 }
 function vCrav(){
   const wk=monday(),list=S.cravings.filter(c=>c.date>=wk),st=cravStats(list);
-  const sum=list.length?'<div class="small" style="margin:8px 0"><b>'+st.n+'</b> cette semaine'+(st.k?' · environ <b>'+st.k+'</b> kcal':'')+(st.emo.length?'<br>Émotions : '+st.emo.slice(0,3).map(e=>esc(e[0])).join(", "):'')+(st.slot[0]?'<br>Surtout : '+esc(st.slot[0][0].toLowerCase()):'')+'</div>':'<div class="empty-note">Rien de noté cette semaine. Si une envie arrive, tu peux la dire ici, sans jugement.</div>';
-  const last=S.cravings.slice().sort((a,b)=>(b.date+b.time).localeCompare(a.date+a.time)).slice(0,2).map(c=>'<div class="item"><div class="grow"><b>'+esc(c.nom)+'</b><div class="small mute">'+fmt(c.date,{day:"numeric",month:"short"})+' · '+esc(c.time)+(c.emo&&c.emo.length?' · '+esc(c.emo.join(", ")):'')+'</div></div><div style="text-align:right">'+(c.kcal?'<b class="num">'+Math.round(c.kcal)+'</b><div class="small mute">kcal</div>':'')+'<button class="x" data-act="cravdel" data-a="'+c.id+'">Retirer</button></div></div>').join("");
+  const sum=list.length?'<div class="small" style="margin:8px 0"><b>'+st.n+'</b> cette semaine'+(st.k?' · environ <b class="sv">'+st.k+'</b> kcal':'')+(st.emo.length?'<br>Émotions : '+st.emo.slice(0,3).map(e=>esc(e[0])).join(", "):'')+(st.slot[0]?'<br>Surtout : '+esc(st.slot[0][0].toLowerCase()):'')+'</div>':'<div class="empty-note">Rien de noté cette semaine. Si une envie arrive, tu peux la dire ici, sans jugement.</div>';
+  const last=S.cravings.slice().sort((a,b)=>(b.date+b.time).localeCompare(a.date+a.time)).slice(0,2).map(c=>'<div class="item"><div class="grow"><b>'+esc(c.nom)+'</b><div class="small mute">'+fmt(c.date,{day:"numeric",month:"short"})+' · '+esc(c.time)+(c.emo&&c.emo.length?' · '+esc(c.emo.join(", ")):'')+'</div></div><div style="text-align:right">'+(c.kcal?'<b class="num sv">'+Math.round(c.kcal)+'</b><div class="small mute">kcal</div>':'')+'<button class="x" data-act="cravdel" data-a="'+c.id+'">Retirer</button></div></div>').join("");
   return '<section class="card"><div class="cap">Craquages et envies hors repas</div><p class="small mute" style="margin:4px 0 0">Noter ce qui s\'est passé et ce que tu ressentais aide à repérer les déclencheurs. Ça apparaît dans le bilan pour ton professionnel de santé.</p>'+sum+last+'<button class="btn ghost block" style="margin-top:10px" data-act="cravnew">'+I_MIC+'Noter un craquage</button></section>';
 }
 function sheetCrav(){
@@ -1119,7 +1129,7 @@ async function cravAI(){
   }catch(e){if(info)info.innerHTML='<p class="small tone-bad" style="font-weight:700;margin:0">'+((e&&MERR[e.code])||"Analyse impossible.")+' Tu peux remplir à la main.</p>'}
 }
 function mealItem(m){
-  return '<div class="item"><div class="grow"><b>'+esc(m.nom)+'</b><div class="small mute">'+esc(m.time)+' · '+esc(m.type)+' · Prot. '+Math.round(m.p||0)+' g · Gluc. '+Math.round(m.g||0)+' g · Lip. '+Math.round(m.l||0)+' g'+'</div></div><div style="text-align:right"><b class="num">'+Math.round(m.kcal||0)+'</b><div class="small mute">kcal</div><button class="x" data-act="mealdel" data-a="'+m.id+'">Retirer</button></div></div>';
+  return '<div class="item"><div class="grow"><b>'+esc(m.nom)+'</b><div class="small mute">'+esc(m.time)+' · '+esc(m.type)+' · <span class="sv">Prot. '+Math.round(m.p||0)+' g · Gluc. '+Math.round(m.g||0)+' g · Lip. '+Math.round(m.l||0)+' g</span>'+'</div></div><div style="text-align:right"><b class="num sv">'+Math.round(m.kcal||0)+'</b><div class="small mute">kcal</div><button class="x" data-act="mealdel" data-a="'+m.id+'">Retirer</button></div></div>';
 }
 
 const MET=[["poids","Poids","kg",1],["ventre","Tour de taille","cm",1],["hanches","Hanches","cm",1],["poitrine","Poitrine","cm",0],["bras","Bras","cm",0],["cuisse","Cuisse","cm",0]];
@@ -1188,15 +1198,15 @@ function avatarSVG(){
 function vCorps(){
   const tiles=MET.map(m=>{
     const l=lastVal(m[0]),f=firstVal(m[0]);let dl="";
-    if(l!=null&&f!=null&&S.body.filter(b=>b[m[0]]!=null).length>1){const d=l-f;dl='<div class="dl '+(m[3]&&d<0?'tone-ok':'mute')+'">'+(d>0?"+":"")+fn(d)+' '+m[2]+' depuis le début</div>'}
-    return '<div class="mtile"><span class="cap">'+m[1]+'</span><b class="num">'+(l!=null?fn(l)+' <span class="small mute" style="font-family:var(--f-b)">'+m[2]+'</span>':'—')+'</b>'+dl+'</div>';
+    if(l!=null&&f!=null&&S.body.filter(b=>b[m[0]]!=null).length>1){const d=l-f;dl='<div class="sv dl '+(m[3]&&d<0?'tone-ok':'mute')+'">'+(d>0?"+":"")+fn(d)+' '+m[2]+' depuis le début</div>'}
+    return '<div class="mtile"><span class="cap">'+m[1]+'</span><b class="num sv">'+(l!=null?fn(l)+' <span class="small mute" style="font-family:var(--f-b)">'+m[2]+'</span>':'—')+'</b>'+dl+'</div>';
   }).join("");
   const i=imc(),th=lastVal("taille");
   const rows=S.body.slice().reverse().map(b=>'<tr><td>'+fmt(b.date,{day:"numeric",month:"short",year:"2-digit"})+'</td><td class="num">'+fn(b.poids)+'</td><td class="num">'+fn(b.ventre)+'</td><td class="num">'+fn(b.hanches)+'</td><td class="num">'+fn(b.poitrine)+'</td><td class="num">'+fn(b.bras)+'</td><td class="num">'+fn(b.cuisse)+'</td><td><button class="x" data-act="bodydel" data-a="'+b.date+'">Suppr.</button></td></tr>').join("");
   const av='<section class="card"><div class="cap">Ton avatar</div>'+avatarSVG()+'<p class="small mute" style="margin:8px 0 0;text-align:center">'+(S.body.length>1?'Les pointillés montrent tes premières mesures.':'Il prend la forme de tes mesures. Ajoute-les pour le façonner.')+'</p></section>';
-  return '<section class="card flat"><div class="row sp"><div><div class="cap">Évolution du poids</div><div class="small mute" style="margin-top:2px">'+(th?'Taille '+fn(th)+' cm':'Taille non renseignée')+(i?' · IMC '+fn(i):'')+'</div></div><button class="btn" data-act="bodyadd">Nouvelle mesure</button></div><div style="margin-top:12px">'+spark()+'</div></section>'+
+  return '<section class="card flat"><div class="row sp"><div><div class="cap">Évolution du poids</div><div class="small mute sv" style="margin-top:2px">'+(th?'Taille '+fn(th)+' cm':'Taille non renseignée')+(i?' · IMC '+fn(i):'')+'</div></div><button class="btn" data-act="bodyadd">Nouvelle mesure</button></div><div class="sv" style="margin-top:12px">'+spark()+'</div></section>'+
    '<div class="tiles" style="margin-top:14px">'+tiles+'</div>'+'<div style="margin-top:14px">'+av+'</div>'+
-   (S.body.length?'<section class="card"><div class="cap">Historique</div><div class="scroll" style="margin-top:8px"><table><thead><tr><th>Date</th><th>Poids</th><th>Tour taille</th><th>Hanch.</th><th>Poitr.</th><th>Bras</th><th>Cuisse</th><th></th></tr></thead><tbody>'+rows+'</tbody></table></div></section>':'')+
+   (S.body.length?'<section class="card"><div class="cap">Historique</div><div class="scroll sv" style="margin-top:8px"><table><thead><tr><th>Date</th><th>Poids</th><th>Tour taille</th><th>Hanch.</th><th>Poitr.</th><th>Bras</th><th>Cuisse</th><th></th></tr></thead><tbody>'+rows+'</tbody></table></div></section>':'')+
    (caps.dl&&(S.body.length||S.meals.length)?'<button class="btn sea block" style="margin-top:14px" data-act="export">Exporter le bilan pour un professionnel de santé</button>':'')+
    '<section class="card"><div class="cap">Modules</div><div class="row sp" style="margin-top:8px;gap:12px"><div class="grow"><b>Bilans énergie</b><div class="small mute">Questionnaires du livre « Mon programme antifatigue », à refaire tous les 3 mois. Tu peux les masquer : tes résultats sont conservés.</div></div><button class="btn sm'+(optOn()?'':' ghost')+'" data-act="optbil" aria-pressed="'+optOn()+'">'+(optOn()?'Activé':'Activer')+'</button></div></section>'+
    '<section class="card"><div class="cap">Sauvegarde de l\'appli</div><p class="small mute" style="margin:6px 0 12px">Tes données sont gardées sur ce téléphone. Une sauvegarde est proposée chaque semaine. '+(S.lastBackup?'Dernière : '+fmt(S.lastBackup,{day:"numeric",month:"long"})+'.':'Aucune pour l\'instant.')+'</p><div class="row" style="flex-wrap:wrap;align-items:stretch"><button class="btn ghost" style="flex:1" data-act="backup">Sauvegarder</button><label class="btn ghost" for="restore" style="flex:1">Restaurer</label><input id="restore" type="file" accept="application/json,.json" hidden></div><div class="row sp" style="margin-top:12px;align-items:flex-start"><div id="syncnote" class="small mute" style="flex:1">'+syncText()+'</div><button class="btn sea sm" data-act="syncopen">'+(syncCode()?'Régler':'Synchroniser')+'</button></div></section>';
@@ -1243,7 +1253,7 @@ function sheetGoal(id){
   openSheet(g?"Modifier l'objectif":"Objectif de la semaine",'<div class="form">'+(SR?'<button class="btn sea block" id="vmic" data-act="voicego">'+I_MIC+'Dicter</button>':'')+'<label class="f">Mon objectif (écris ce que tu veux)<textarea id="gt" rows="3" maxlength="140" placeholder="Avec tes mots">'+esc(g?g.t:"")+'</textarea></label><button class="btn block" data-act="goalsave" data-a="'+(id||"")+'">'+(g?"Enregistrer":"Ajouter l'objectif · +6 XP")+'</button>'+(g?'<button class="btn ghost block" data-act="goaldel" data-a="'+id+'">Supprimer cet objectif</button>':'')+'</div>');
 }
 function sheetBody(){
-  const f=(id,l,k)=>'<label class="f">'+l+'<input id="'+id+'" inputmode="decimal" placeholder="—" value="'+(lastVal(k)!=null?fn(lastVal(k)):"")+'"></label>';
+  const f=(id,l,k)=>'<label class="f">'+l+'<input id="'+id+'" inputmode="decimal" placeholder="—" value="'+(lastVal(k)!=null&&!hideOn()?fn(lastVal(k)):"")+'"></label>';
   openSheet("Nouvelle mesure",'<div class="form"><label class="f">Date<input id="b_date" type="date" value="'+today()+'" max="'+today()+'"></label><div class="two">'+f("b_poids","Poids (kg)","poids")+f("b_taille","Taille (cm)","taille")+'</div><div class="two">'+f("b_ventre","Tour de taille (cm)","ventre")+f("b_hanches","Hanches (cm)","hanches")+'</div><div class="two">'+f("b_poitrine","Poitrine (cm)","poitrine")+f("b_bras","Bras (cm)","bras")+'</div>'+f("b_cuisse","Cuisse (cm)","cuisse")+'<button class="btn block" data-act="bodysave">Enregistrer · +10 XP</button><button class="btn ghost block" data-act="close">Annuler</button></div>');
 }
 function sheetMealAdd(){
@@ -1563,6 +1573,7 @@ function act(a,x,y,el){
     const sc=window.__q.ans.reduce((a,b)=>a+b,0);S.bilans.push({id:uid(),date:today(),kind:q.id,score:sc,ans:window.__q.ans.slice()});
     gain(10,5,0,"Bilan fait.");persist();closeSheet();render();break}
   case "qdel":S.bilans=S.bilans.filter(b=>b.id!==x);persist();render();break;
+  case "hide":{S.opts=S.opts||{};S.opts.hide=!S.opts.hide;persist();render();toast(S.opts.hide?"Mode discret : chiffres masqués":"Chiffres affichés");break}
   case "sec":secOpen[x]=!secOpen[x];render();break;
   case "mealadd":sheetMealAdd();break;
   case "goalquick":{const t=val("gq").trim();if(!t){toast("Écris ton objectif");return}if(S.goals.length>=3){toast("3 objectifs maximum");return}S.goals.push({id:"g"+uid(),t:t,s:0,p:0});gain(6,0,0,"Objectif ajouté.");persist();render();break}
@@ -1585,7 +1596,7 @@ function act(a,x,y,el){
     const e={date:val("b_date")||today(),poids:num(val("b_poids")),taille:num(val("b_taille")),ventre:num(val("b_ventre")),hanches:num(val("b_hanches")),poitrine:num(val("b_poitrine")),bras:num(val("b_bras")),cuisse:num(val("b_cuisse"))};
     if(MET.concat([["taille"]]).every(m=>e[m[0]]==null)){toast("Renseigne au moins une mesure");return}
     S.body=S.body.filter(b=>b.date!==e.date);S.body.push(e);S.body.sort((a,b)=>a.date.localeCompare(b.date));
-    gain(10,5,0,"Mesure notée.");persist();closeSheet();render();break}
+    gain(10,5,0,"Mesure notée.");const firstM=S.body.length===1&&!(S.opts&&S.opts.hint);if(firstM){S.opts=S.opts||{};S.opts.hint=1}persist();closeSheet();render();if(firstM)setTimeout(()=>toast("Astuce : l'œil en haut masque tes chiffres quand tu montres l'app"),2400);break}
   case "bodydel":S.body=S.body.filter(b=>b.date!==x);persist();render();break;
   case "export":exportBilan();break;
   case "backup":backupData();break;
