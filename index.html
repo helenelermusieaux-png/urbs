@@ -16,7 +16,7 @@
 <title>Clairière</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=DM+Sans:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 /* Layout: une appli mobile en colonne, en-tête collant (niveau, glands, lucioles), contenu par onglet, barre d'onglets en bas. La forêt est une grille de 6x6 tuiles vue du dessus, façon Caesar III. */
 :root{
@@ -309,31 +309,31 @@ input:focus,select:focus,textarea:focus{outline:0;border-color:var(--terra);box-
 
 /* ===== Lisière — design system Clairière (V1) ===== */
 :root{
- --paper:#f3efe4;--card:#ffffff;--ink:#1f261d;--ink-2:#4d5647;--mute:#5d6657;--mute-2:#7d8676;
- --line:#e2dac7;--line-2:#cec4a9;--moss:#2e6b44;--moss-2:#3f8b58;--moss-ink:#e4eddc;
- --gold:#b8811a;--gold-soft:#f7edd3;--night:#16211c;--night-2:#223228;--danger:#a93b2c;
- --bg:var(--paper);--terra:var(--moss);--terra-d:#1f4d31;--on-terra:#fff;
- --sea:#a9522a;--sea-d:#7e3b1e;--on-sea:#fff;--olive:var(--moss-2);--olive-d:var(--moss);--ok:var(--moss);--gold-d:#8a6012;
- --f-d:"Fraunces",Georgia,serif;--f-b:"DM Sans",system-ui,-apple-system,"Segoe UI",sans-serif;--f-m:"DM Mono",ui-monospace,Menlo,monospace;
+ --paper:#f4f6f1;--card:#ffffff;--ink:#1b2620;--ink-2:#44524a;--mute:#5a685f;--mute-2:#7d8b82;
+ --line:#e3e8df;--line-2:#d1d9cc;--moss:#2b7f48;--moss-2:#3e9a5b;--moss-ink:#e4eddc;
+ --gold:#e6ae35;--gold-soft:#fcf2d9;--night:#16211c;--night-2:#223228;--danger:#a93b2c;
+ --bg:var(--paper);--terra:var(--moss);--terra-d:#1d5a33;--on-terra:#fff;
+ --sea:#a85a19;--sea-d:#7a3f10;--on-sea:#fff;--olive:var(--moss-2);--olive-d:var(--moss);--ok:var(--moss);--gold-d:#8a6012;
+ --f-d:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;--f-b:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;--f-m:"Inter",system-ui,-apple-system,sans-serif;
  --sh-1:0 1px 2px rgba(31,38,29,.05),0 10px 24px -14px rgba(31,38,29,.22);--sh-2:0 2px 4px rgba(31,38,29,.06),0 18px 40px -16px rgba(31,38,29,.34);
  --sh1:var(--sh-1);--sh2:0 1px 2px rgba(31,38,29,.06);color-scheme:light}
 body{font-family:var(--f-b);font-size:15px;line-height:1.5;letter-spacing:0;color:var(--ink);background:var(--paper)}
 .app{max-width:411px}
-h1,h2,h3,.hl{font-family:var(--f-d);font-weight:600;letter-spacing:-.025em}
-.hl{font-size:27px;line-height:1.16}
-.card-t{font:600 19px var(--f-d);letter-spacing:-.02em}
-.cap{font:500 11px var(--f-m);letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+h1,h2,h3,.hl{font-weight:700;letter-spacing:-.022em}
+.hl{font-size:26px;line-height:1.15;letter-spacing:-.03em}
+.card-t{font:700 19px var(--f-d);letter-spacing:-.02em}
+.cap{font:600 12px var(--f-b);letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}
 .num,.kpi b,.pill,.lvl{font-family:var(--f-m);font-variant-numeric:tabular-nums}
 .head{background:color-mix(in srgb,var(--paper) 88%,transparent)}
-.lvl{width:50px;height:54px;border-radius:0;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:var(--gold);color:var(--ink);font-weight:500;font-size:18px;box-shadow:none}
-.who b{font:600 16px var(--f-d);letter-spacing:-.01em}
+.lvl{width:50px;height:54px;border-radius:0;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:var(--gold);color:var(--ink);font-weight:700;font-size:18px;box-shadow:none}
+.who b{font:700 15px var(--f-d);letter-spacing:-.01em}
 .who .bar>i{background:var(--gold)}
 .bar{background:var(--line);height:8px}
-.pill{border:1px solid var(--line);background:var(--card);font-size:14px;font-weight:500}
+.pill{border:1px solid var(--line);background:var(--card);font-size:14px;font-weight:700}
 .card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:18px;box-shadow:var(--sh-1);margin-top:12px}
 .card.featured{border-color:var(--gold);box-shadow:inset 0 0 0 1px var(--gold),var(--sh-1);background:linear-gradient(180deg,var(--gold-soft),var(--card) 70%)}
 .card.night{background:var(--night);border-color:var(--night-2);color:var(--moss-ink)}
-.btn{min-height:50px;border-radius:14px;font:700 15px var(--f-b);letter-spacing:0;background:var(--moss);color:#fff;border:0;box-shadow:inset 0 1px 0 rgba(255,255,255,.16),0 1px 2px rgba(31,38,29,.22)}
+.btn{min-height:50px;border-radius:14px;font:600 15px var(--f-b);letter-spacing:0;background:var(--moss);color:#fff;border:0;box-shadow:inset 0 1px 0 rgba(255,255,255,.16),0 1px 2px rgba(31,38,29,.22)}
 .btn:active:not(:disabled){transform:scale(.98);filter:brightness(.95);box-shadow:none}
 .btn.gold{background:var(--gold);color:var(--ink)}
 .btn.sea{background:var(--sea);color:#fff;box-shadow:inset 0 1px 0 rgba(255,255,255,.16),0 1px 2px rgba(31,38,29,.22)}
@@ -345,8 +345,8 @@ h1,h2,h3,.hl{font-family:var(--f-d);font-weight:600;letter-spacing:-.025em}
 button.chip{cursor:pointer;min-height:38px;padding:6px 14px;background:var(--card);border:1px solid var(--line-2);color:var(--ink);font-size:13.5px}
 button.chip.on{background:var(--moss);color:#fff;border-color:var(--moss)}
 .kpi{background:var(--card);border:1px solid var(--line);border-radius:20px;box-shadow:var(--sh-1);padding:14px 6px}
-.kpi b{font:500 26px/1.1 var(--f-m);letter-spacing:-.03em}
-.kpi small{font:400 14px var(--f-m);color:var(--mute)}
+.kpi b{font:700 26px/1.1 var(--f-b);letter-spacing:-.03em}
+.kpi small{font:600 14px var(--f-b);color:var(--mute)}
 .kpi span{font:500 12px var(--f-b);color:var(--mute)}
 .kpi.is-empty{background:transparent;border:1.5px dashed var(--line-2);box-shadow:none}
 .kpi.is-empty b{color:var(--mute-2)}
